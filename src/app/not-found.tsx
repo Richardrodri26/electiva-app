@@ -13,7 +13,7 @@ export default function NoEncontrado() {
         Puede que el enlace esté roto o que la página ya no exista. Volvé al
         inicio y empezá de nuevo.
       </p>
-      <Button render={<Link href="/">Ir al inicio</Link>} />
+      <Button nativeButton={false} render={<Link href="/">Ir al inicio</Link>} />
     </main>
   );
 }
