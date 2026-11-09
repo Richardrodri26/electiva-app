@@ -1,18 +1,18 @@
 /**
- * Persistencia del borrador del asistente en `localStorage`
- * (`features/asistente/borrador-almacenamiento.ts`, tarea T5.2).
+ * Persistencia del borrador del asistente (`features/asistente/borrador-almacenamiento.ts`, T5.2).
  *
- * Wrapper simple e inline con `try/catch` (no depende de `src/lib/almacenamiento.ts`:
- * esa utilidad puede no existir todavía — la está armando en paralelo el agente de
- * `src/features/editor/`, ver prompt de la tarea). `localStorage` puede no estar
- * disponible (render en el servidor, modo privado, cuota excedida, navegador sin
- * soporte): ninguna función de este archivo lanza nunca, para que el asistente siga
- * funcionando igual sin persistencia si eso pasa.
+ * El acceso a `localStorage` (try/catch, SSR, cuota) vive en `lib/almacenamiento.ts`: acá
+ * quedan solo las cosas específicas del asistente — la clave, el esquema de validación y la
+ * instantánea estable para `useSyncExternalStore`. Quien guarda, lee o borra llama directo a
+ * `guardar` / `leer` / `borrar` de `@/lib/almacenamiento` con `CLAVE_BORRADOR_ASISTENTE`.
  *
- * Dominio puro aparte (AGENTS.md regla de oro #1): este archivo SÍ toca una API del
- * navegador (`localStorage`), por eso vive en `features/asistente/`, no en
- * `src/dominio/**`.
+ * Dominio puro aparte (AGENTS.md regla de oro #1): este archivo NO importa React ni toca
+ * `localStorage` directamente; vive en `features/asistente/` porque el borrador es de la UI.
  */
+
+import { z } from "zod";
+
+import { leer, leerCrudo } from "@/lib/almacenamiento";
 
 import type { BorradorAsistente } from "./estado";
 import type { NumeroPasoAsistente } from "./use-paso-asistente";
@@ -66,72 +66,40 @@ function esBorradorValido(valor: unknown): valor is BorradorAsistente {
   return paso1Valido && paso2Valido && paso3Valido && paso4Valido;
 }
 
-/** Guarda el borrador y la posición actual. Nunca lanza. */
-export function guardarBorrador(datos: BorradorGuardado): void {
-  try {
-    localStorage.setItem(CLAVE_BORRADOR_ASISTENTE, JSON.stringify(datos));
-  } catch {
-    // `localStorage` no disponible (SSR, modo privado, cuota excedida): se ignora, el
-    // asistente sigue funcionando sin persistencia.
-  }
-}
-
-/** Lee el borrador guardado, o `null` si no hay uno (o no es válido). Nunca lanza. */
-export function leerBorrador(): BorradorGuardado | null {
-  try {
-    const texto = localStorage.getItem(CLAVE_BORRADOR_ASISTENTE);
-    if (texto === null) return null;
-
-    const json = JSON.parse(texto) as unknown;
-    if (typeof json !== "object" || json === null) return null;
-    const datos = json as Record<string, unknown>;
-
-    if (!esBorradorValido(datos.borrador) || !esPasoValido(datos.paso) || !esPasoValido(datos.pasoMaximoAlcanzado)) {
-      return null;
-    }
-
-    return { borrador: datos.borrador, paso: datos.paso, pasoMaximoAlcanzado: datos.pasoMaximoAlcanzado };
-  } catch {
-    return null;
-  }
-}
-
-/** Borra el borrador guardado. Nunca lanza. */
-export function borrarBorrador(): void {
-  try {
-    localStorage.removeItem(CLAVE_BORRADOR_ASISTENTE);
-  } catch {
-    // Ver nota de `guardarBorrador`.
-  }
-}
+/**
+ * Esquema de lectura del borrador guardado. `z.custom` envuelve los chequeos estructurales
+ * de arriba (ver nota en `esBorradorValido`); `z.object` descarta claves extra, así que
+ * `leer` devuelve exactamente `{ borrador, paso, pasoMaximoAlcanzado }`.
+ */
+export const esquemaBorradorGuardado: z.ZodType<BorradorGuardado> = z.object({
+  borrador: z.custom<BorradorAsistente>(esBorradorValido),
+  paso: z.custom<NumeroPasoAsistente>(esPasoValido),
+  pasoMaximoAlcanzado: z.custom<NumeroPasoAsistente>(esPasoValido),
+});
 
 // ---------------------------------------------------------------------------
 // `getSnapshot` para `useSyncExternalStore` (banner "modelo sin terminar")
 // ---------------------------------------------------------------------------
 //
-// `leerBorrador()` arriba parsea JSON de nuevo en cada llamada: devuelve un objeto
-// NUEVO (distinta referencia) aun cuando el contenido de `localStorage` no cambió.
-// `useSyncExternalStore` exige que su `getSnapshot` devuelva la MISMA referencia
-// mientras el store no cambie — si no, React entiende que hay "tearing" y vuelve a
-// renderizar sin parar ("The result of getSnapshot should be cached to avoid an
-// infinite loop"). Por eso esta variante cachea el último valor ya parseado, y solo
-// vuelve a parsear cuando el string crudo de `localStorage` efectivamente cambió.
+// `leer(...)` parsea JSON de nuevo en cada llamada: devuelve un objeto NUEVO (distinta
+// referencia) aun cuando el contenido de `localStorage` no cambió. `useSyncExternalStore`
+// exige que su `getSnapshot` devuelva la MISMA referencia mientras el store no cambie — si
+// no, React entiende que hay "tearing" y vuelve a renderizar sin parar ("The result of
+// getSnapshot should be cached to avoid an infinite loop"). Por eso esta función compara el
+// string CRUDO (`leerCrudo`, sin parsear) contra el último visto, y solo vuelve a parsear
+// cuando ese string efectivamente cambió. NO quitar este cache: si se reemplaza por una
+// llamada directa a `leer`, vuelve el loop infinito.
 
 let ultimoCrudo: string | null = null;
 let ultimoValor: BorradorGuardado | null = null;
 
 /** `getSnapshot` estable para `useSyncExternalStore`. Nunca lanza. */
 export function obtenerInstantaneaBorradorGuardado(): BorradorGuardado | null {
-  let crudo: string | null;
-  try {
-    crudo = localStorage.getItem(CLAVE_BORRADOR_ASISTENTE);
-  } catch {
-    crudo = null;
-  }
+  const crudo = leerCrudo(CLAVE_BORRADOR_ASISTENTE);
 
   if (crudo !== ultimoCrudo) {
     ultimoCrudo = crudo;
-    ultimoValor = leerBorrador();
+    ultimoValor = leer(CLAVE_BORRADOR_ASISTENTE, esquemaBorradorGuardado);
   }
 
   return ultimoValor;

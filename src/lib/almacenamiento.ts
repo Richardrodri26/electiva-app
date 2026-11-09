@@ -61,6 +61,23 @@ export function leer<T>(clave: string, esquema: z.ZodType<T>): T | null {
 }
 
 /**
+ * Devuelve el string crudo guardado bajo `clave`, sin parsear, o `null` si no hay nada o
+ * `localStorage` no está disponible. Sirve para comparar si el contenido cambió sin pagar
+ * el `JSON.parse` (ej. `getSnapshot` de `useSyncExternalStore`). Nunca lanza.
+ */
+export function leerCrudo(clave: string): string | null {
+  const almacen = obtenerAlmacen();
+  if (almacen === null) {
+    return null;
+  }
+  try {
+    return almacen.getItem(clave);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Guarda `valor` (serializado con `JSON.stringify`) bajo `clave`. Devuelve `true` si se
  * guardó, `false` si `localStorage` no está disponible o si escribir lanzó (ej. cupo lleno:
  * `QuotaExceededError`, o `valor` no es serializable) — nunca lanza.

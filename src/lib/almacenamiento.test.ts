@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { borrar, guardar, leer } from "./almacenamiento";
+import { borrar, guardar, leer, leerCrudo } from "./almacenamiento";
 
 /** `Storage` mínimo en memoria, para no depender de jsdom (`vitest.config.mts`: `environment: "node"`). */
 function crearAlmacenFalso(): Storage {
@@ -68,6 +68,14 @@ describe("almacenamiento", () => {
     borrar("clave");
 
     expect(leer("clave", esquema)).toBeNull();
+  });
+
+  it("leerCrudo devuelve el string tal cual se guardó, sin parsear, o null si no hay nada", () => {
+    vi.stubGlobal("localStorage", crearAlmacenFalso());
+
+    expect(leerCrudo("clave")).toBeNull();
+    guardar("clave", { n: 1 });
+    expect(leerCrudo("clave")).toBe('{"n":1}');
   });
 
   it("borrar una clave inexistente no lanza", () => {

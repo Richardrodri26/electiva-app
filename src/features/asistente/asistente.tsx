@@ -33,12 +33,12 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { toast } from "sonner";
 
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
+import { borrar, guardar } from "@/lib/almacenamiento";
 
 import { AsistentePasos } from "./asistente-pasos";
 import { BannerBorradorSinTerminar } from "./banner-borrador-sin-terminar";
 import {
-  borrarBorrador,
-  guardarBorrador,
+  CLAVE_BORRADOR_ASISTENTE,
   obtenerInstantaneaBorradorGuardado,
   type BorradorGuardado,
 } from "./borrador-almacenamiento";
@@ -119,7 +119,7 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
   // Persistencia: solo mientras haya progreso real (ver `haIniciadoRef`).
   useEffect(() => {
     if (!haIniciadoRef.current) return;
-    guardarBorrador({ borrador, paso: pasoVisible, pasoMaximoAlcanzado });
+    guardar(CLAVE_BORRADOR_ASISTENTE, { borrador, paso: pasoVisible, pasoMaximoAlcanzado } satisfies BorradorGuardado);
   }, [borrador, pasoVisible, pasoMaximoAlcanzado]);
 
   const modeloCompleto = useMemo(() => {
@@ -232,13 +232,13 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
     setBorrador(crearBorradorAsistente());
     setCorrigiendoSeccion(false);
     retrocederA(1);
-    borrarBorrador();
+    borrar(CLAVE_BORRADOR_ASISTENTE);
     haIniciadoRef.current = false;
   }
 
   /** "Cancelar", ya confirmado el diálogo: borra el borrador y vuelve al inicio. */
   function manejarCancelarConfirmado(): void {
-    borrarBorrador();
+    borrar(CLAVE_BORRADOR_ASISTENTE);
     setBorrador(crearBorradorAsistente());
     setCorrigiendoSeccion(false);
     retrocederA(1);
@@ -255,7 +255,7 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
   }
 
   function descartarBorradorGuardado(): void {
-    borrarBorrador();
+    borrar(CLAVE_BORRADOR_ASISTENTE);
     setBannerDescartado(true);
   }
 
