@@ -118,6 +118,10 @@ Para cada fila: si el coeficiente en la columna pivote es `> 0`, razón = `R / c
 si es `≤ 0`, la fila **no participa** (`excluida`). Sale la fila con **menor razón**.
 - Empate → la de **menor índice de fila** (más arriba). `empateSalida = true` (avisar posible degeneración).
 - Ninguna fila participa → `estado = 'no_acotado'`, fin.
+  **Excepción:** si en ese momento alguna `Aᵢ` sigue básica con valor `> 0`, el diagnóstico es
+  `estado = 'infactible'`, no `no_acotado`. Motivo: si ninguna fila participa, la Fase I implícita (sacar
+  las artificiales de la base) ya alcanzó su óptimo con un valor `> 0`, o sea, el modelo original no tiene
+  solución factible. Ver §4.1.
 
 ### 3.4 Elemento pivote (diapositiva 16)
 
@@ -146,6 +150,10 @@ Volver a §3.1. Si se superan `maxIteraciones` → `estado = 'limite_iteraciones
 Al alcanzar la optimalidad, si alguna `Aᵢ` sigue básica con valor `> 0` → `estado = 'infactible'`
 (no se reporta `solucion`). Si está básica con valor `0`, la solución es válida (aviso de degeneración).
 
+Esta regla también aplica cuando el diagnóstico sería `no_acotado` (§3.3, ninguna fila participa): si alguna
+`Aᵢ` sigue básica con valor `> 0`, el estado es `infactible`, nunca `no_acotado`. La razón es la misma: la
+Fase I implícita ya llegó a su óptimo con un valor `> 0`, por lo que no existe punto factible.
+
 ### 4.2 Solución
 
 Básicas = su `R`; no básicas = 0. `z = valorZ.a` (en este punto `valorZ.b = 0`). Esto vale tanto para max
@@ -165,6 +173,7 @@ esas columnas (si tiene razón válida; si no, solo se informa el estado).
 | `degenerada` | alguna básica con valor 0 en la solución | "Solución degenerada: una variable básica vale 0." |
 | `empate` | hubo `empateEntrada` o `empateSalida` | "Hubo un empate; se eligió la primera opción (más a la izquierda / más arriba)." |
 | `objetivo_cero` | todos los cⱼ = 0 | ver `03` §3.3 |
+| `posible_ciclo` | se superan `maxIteraciones` (§3.6) sin llegar a óptimo (`estado = 'limite_iteraciones'`) | "Se superó el límite de iteraciones sin llegar a una solución; puede indicar ciclado." |
 
 ## 5. Interpretación (`interpretar.ts`)
 

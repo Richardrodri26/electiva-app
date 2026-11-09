@@ -93,6 +93,7 @@ max Z = x1 + x2
 R1: x1 + x2 ≤ 2
 R2: x1 + x2 ≥ 5
 ```
+- Fila Z tras ajuste de M: `[-1 - M, -1 - M, 0, M, 0 | -5M]` → **empate de entrada**, entra `x1` (más a la izquierda); aviso `empate`.
 - Traza: `x1 / S1 / 1`; termina con `A2 = 3` básica → **`infactible`**.
 - Gráfico: sin puntos factibles → `infactible`.
 
@@ -102,6 +103,7 @@ R2: x1 + x2 ≥ 5
 max Z = x1 + x2
 R1: x1 − x2 ≤ 1
 ```
+- Fila Z inicial `[-1, -1, 0 | 0]` → **empate de entrada**, entra `x1` (más a la izquierda); aviso `empate`.
 - Traza: `x1 / S1 / 1` → entra `x2`, ninguna razón válida → **`no_acotado`**.
 - Gráfico: `no_acotado`.
 
