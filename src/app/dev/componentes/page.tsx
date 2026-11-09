@@ -16,7 +16,6 @@ import { C1, C5 } from "@/dominio/__fixtures__/casos";
 import type { Fraccion } from "@/dominio/aritmetica/fraccion";
 import { parsearFraccion } from "@/dominio/aritmetica/parseo";
 import { generarTokensExpresion, generarTokensRestriccion, type FormatoNumero } from "@/dominio/modelo/formato";
-import type { Variable } from "@/dominio/modelo/tipos";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +24,6 @@ import { ErrorAmable } from "@/components/comunes/error-amable";
 import { EstadoVacio } from "@/components/comunes/estado-vacio";
 import { NumeroRacional } from "@/components/comunes/numero-racional";
 
-/** Los fixtures (`ModeloCaso`) sólo dan nombres de variable; `formato.ts` sólo necesita `.nombre`. */
-function variablesDe(nombres: string[]): Variable[] {
-  return nombres.map((nombre) => ({ nombre, etiqueta: nombre, definicion: nombre }));
-}
-
 const FORMATOS: FormatoNumero[] = ["fraccion", "decimal"];
 
 export default function ComponentesPage() {
@@ -37,8 +31,8 @@ export default function ComponentesPage() {
     notFound();
   }
 
-  const variablesC1 = variablesDe(C1.modelo.variables);
-  const variablesC5 = variablesDe(C5.modelo.variables);
+  const variablesC1 = C1.modelo.variables;
+  const variablesC5 = C5.modelo.variables;
 
   // Valores de la solución de C1 (docs/08), para <NumeroRacional>.
   const x1 = parsearFraccion(C1.simplex.solucion!.x1!);

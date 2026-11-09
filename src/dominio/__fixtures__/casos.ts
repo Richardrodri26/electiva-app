@@ -5,34 +5,36 @@
  * Todos los números están como `string` (ej. "4", "1/3", "-5", "-M"), nunca como
  * `number`, porque se consumen por aritmética exacta (Fraccion / ValorM).
  *
- * TIPOS LOCALES TEMPORALES: los tipos de este archivo (`ModeloCaso`, `CasoPrueba`, ...)
- * son mínimos y sólo describen la forma de los datos. Cuando exista el tipo real
- * `ModeloLineal` (dominio/modelo/tipos.ts) hay que reconciliar y reemplazar estos
- * tipos locales por el real, importándolo en vez de definirlo aquí.
+ * `modelo` usa el tipo real `ModeloLineal` (`dominio/modelo/tipos.ts`). Para los campos
+ * que docs/08 no provee (etiqueta/definición de variable, nombre de restricción) se usan
+ * los valores por defecto documentados: etiqueta/definición en docs/03-dominio-y-validacion.md §2
+ * ("x{i}" / "x{i} = variable de decisión {i}.") y nombre de restricción en
+ * docs/06-ux-ui.md §3.3 ("Restricción n") — ver también el ejemplo de `ModeloLineal` completo
+ * en docs/08-casos-de-prueba.md §2, que confirma ambos defaults y `origen: 'ejemplo'`.
  */
 
-export type Sentido = 'max' | 'min';
-export type Relacion = '<=' | '>=' | '=';
-export type Naturaleza = 'entera' | 'fraccionaria';
-export type EstadoResultado = 'optimo' | 'infactible' | 'no_acotado' | 'optimos_alternativos';
+import type { ModeloLineal, Relacion, Restriccion, Variable } from "../modelo/tipos";
 
-export interface RestriccionCaso {
-  numero: string;
-  coeficientes: string[];
-  relacion: Relacion;
-  limite: string;
+export type EstadoResultado = "optimo" | "infactible" | "no_acotado" | "optimos_alternativos";
+
+/** Variable con etiqueta/definición por defecto (docs/03 §2). */
+function variable(nombre: string): Variable {
+  const indice = nombre.slice(1);
+  return {
+    nombre,
+    etiqueta: nombre,
+    definicion: `${nombre} = variable de decisión ${indice}.`,
+  };
 }
 
-export interface ModeloCaso {
-  sentido: Sentido;
-  naturaleza: Naturaleza;
-  /** Nombres de variables de decisión, en orden: "x1", "x2", ... */
-  variables: string[];
-  objetivo: {
-    coeficientes: string[];
-    simbolo: 'Z';
-  };
-  restricciones: RestriccionCaso[];
+/** Restricción con nombre por defecto (docs/06-ux-ui.md §3.3: "Restricción n"). */
+function restriccion(
+  numero: number,
+  coeficientes: string[],
+  relacion: Relacion,
+  limite: string,
+): Restriccion {
+  return { numero, nombre: `Restricción ${numero}`, coeficientes, relacion, limite };
 }
 
 /** Una iteración de la traza: `entra / sale / pivote`. `null` cuando no hay pivote (C8). */
@@ -106,7 +108,7 @@ export interface CasoPrueba {
   normalizacion?: string;
   /** Columnas de la tabla Simplex, cuando docs/08 las enumera */
   columnas?: string[];
-  modelo: ModeloCaso;
+  modelo: ModeloLineal;
   simplex: ResultadoSimplex;
   /** Fila Z inicial (antes del ajuste de M), cuando docs/08 la da */
   zInicial?: string[];
@@ -128,15 +130,16 @@ export const C1: CasoPrueba = {
   esEjemplo: true,
   normalizacion: 'R2: -3x1 + 2x2 >= -18 se normaliza a 3x1 - 2x2 <= 18',
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['3', '2'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['3', '2'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '5'], relacion: '<=', limite: '35' },
-      { numero: '2', coeficientes: ['-3', '2'], relacion: '>=', limite: '-18' },
-      { numero: '3', coeficientes: ['2', '4'], relacion: '<=', limite: '26' },
+      restriccion(1, ['2', '5'], '<=', '35'),
+      restriccion(2, ['-3', '2'], '>=', '-18'),
+      restriccion(3, ['2', '4'], '<=', '26'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -179,14 +182,15 @@ export const C2: CasoPrueba = {
   titulo: 'Actividad en clase',
   esEjemplo: true,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['3', '5'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['3', '5'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '1'], relacion: '<=', limite: '8' },
-      { numero: '2', coeficientes: ['1', '2'], relacion: '<=', limite: '8' },
+      restriccion(1, ['2', '1'], '<=', '8'),
+      restriccion(2, ['1', '2'], '<=', '8'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -217,14 +221,15 @@ export const C2_E: CasoPrueba = {
   titulo: 'Igual a C2 con naturaleza entera',
   esEjemplo: false,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'entera',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['3', '5'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['3', '5'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '1'], relacion: '<=', limite: '8' },
-      { numero: '2', coeficientes: ['1', '2'], relacion: '<=', limite: '8' },
+      restriccion(1, ['2', '1'], '<=', '8'),
+      restriccion(2, ['1', '2'], '<=', '8'),
     ],
+    naturaleza: 'entera',
   },
   simplex: {
     estado: 'optimo',
@@ -254,14 +259,15 @@ export const C3: CasoPrueba = {
   titulo: 'Compromiso',
   esEjemplo: true,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['4', '3'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['4', '3'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '1'], relacion: '<=', limite: '12' },
-      { numero: '2', coeficientes: ['1', '1'], relacion: '<=', limite: '7' },
+      restriccion(1, ['2', '1'], '<=', '12'),
+      restriccion(2, ['1', '1'], '<=', '7'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -291,14 +297,15 @@ export const C4: CasoPrueba = {
   titulo: 'Ejercicio 2',
   esEjemplo: true,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['6', '4'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['6', '4'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '1'], relacion: '<=', limite: '14' },
-      { numero: '2', coeficientes: ['1', '3'], relacion: '<=', limite: '18' },
+      restriccion(1, ['2', '1'], '<=', '14'),
+      restriccion(2, ['1', '3'], '<=', '18'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -329,14 +336,15 @@ export const C5: CasoPrueba = {
   esEjemplo: false,
   columnas: ['x1', 'x2', 'S1', 'S2', 'A1', 'A2'],
   modelo: {
-    sentido: 'min',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['2', '3'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'min', coeficientes: ['2', '3'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['1', '1'], relacion: '>=', limite: '4' },
-      { numero: '2', coeficientes: ['1', '3'], relacion: '>=', limite: '6' },
+      restriccion(1, ['1', '1'], '>=', '4'),
+      restriccion(2, ['1', '3'], '>=', '6'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -370,14 +378,15 @@ export const C6: CasoPrueba = {
   esEjemplo: false,
   columnas: ['x1', 'x2', 'S2', 'A1'],
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['1', '2'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['1', '2'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['1', '1'], relacion: '=', limite: '5' },
-      { numero: '2', coeficientes: ['1', '0'], relacion: '<=', limite: '3' },
+      restriccion(1, ['1', '1'], '=', '5'),
+      restriccion(2, ['1', '0'], '<=', '3'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -403,14 +412,15 @@ export const C7: CasoPrueba = {
   titulo: 'Infactible',
   esEjemplo: false,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['1', '1'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['1', '1'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['1', '1'], relacion: '<=', limite: '2' },
-      { numero: '2', coeficientes: ['1', '1'], relacion: '>=', limite: '5' },
+      restriccion(1, ['1', '1'], '<=', '2'),
+      restriccion(2, ['1', '1'], '>=', '5'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'infactible',
@@ -433,11 +443,12 @@ export const C8: CasoPrueba = {
   titulo: 'No acotado',
   esEjemplo: false,
   modelo: {
-    sentido: 'max',
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['1', '1'], simbolo: 'Z' },
+    restricciones: [restriccion(1, ['1', '-1'], '<=', '1')],
     naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['1', '1'], simbolo: 'Z' },
-    restricciones: [{ numero: '1', coeficientes: ['1', '-1'], relacion: '<=', limite: '1' }],
   },
   simplex: {
     estado: 'no_acotado',
@@ -462,14 +473,15 @@ export const C9: CasoPrueba = {
   titulo: 'Óptimos alternativos',
   esEjemplo: false,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['2', '4'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['2', '4'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['1', '2'], relacion: '<=', limite: '8' },
-      { numero: '2', coeficientes: ['1', '0'], relacion: '<=', limite: '6' },
+      restriccion(1, ['1', '2'], '<=', '8'),
+      restriccion(2, ['1', '0'], '<=', '6'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimos_alternativos',
@@ -501,15 +513,16 @@ export const C10: CasoPrueba = {
   titulo: 'Tres variables',
   esEjemplo: false,
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2', 'x3'],
-    objetivo: { coeficientes: ['5', '4', '3'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2'), variable('x3')],
+    objetivo: { sentido: 'max', coeficientes: ['5', '4', '3'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['2', '3', '1'], relacion: '<=', limite: '5' },
-      { numero: '2', coeficientes: ['4', '1', '2'], relacion: '<=', limite: '11' },
-      { numero: '3', coeficientes: ['3', '4', '2'], relacion: '<=', limite: '8' },
+      restriccion(1, ['2', '3', '1'], '<=', '5'),
+      restriccion(2, ['4', '1', '2'], '<=', '11'),
+      restriccion(3, ['3', '4', '2'], '<=', '8'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -534,15 +547,16 @@ export const C11: CasoPrueba = {
   esEjemplo: false,
   columnas: ['x1', 'x2', 'x3', 'S1', 'S2', 'A1', 'A3'],
   modelo: {
-    sentido: 'min',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2', 'x3'],
-    objetivo: { coeficientes: ['2', '3', '4'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2'), variable('x3')],
+    objetivo: { sentido: 'min', coeficientes: ['2', '3', '4'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['1', '1', '1'], relacion: '>=', limite: '10' },
-      { numero: '2', coeficientes: ['2', '1', '0'], relacion: '<=', limite: '20' },
-      { numero: '3', coeficientes: ['0', '1', '3'], relacion: '=', limite: '9' },
+      restriccion(1, ['1', '1', '1'], '>=', '10'),
+      restriccion(2, ['2', '1', '0'], '<=', '20'),
+      restriccion(3, ['0', '1', '3'], '=', '9'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimo',
@@ -568,14 +582,15 @@ export const C12: CasoPrueba = {
   normalizacion: 'R1: -x1 - x2 = -4 se normaliza a x1 + x2 = 4',
   columnas: ['x1', 'x2', 'S2', 'A1'],
   modelo: {
-    sentido: 'max',
-    naturaleza: 'fraccionaria',
-    variables: ['x1', 'x2'],
-    objetivo: { coeficientes: ['1', '1'], simbolo: 'Z' },
+    version: 1,
+    origen: 'ejemplo',
+    variables: [variable('x1'), variable('x2')],
+    objetivo: { sentido: 'max', coeficientes: ['1', '1'], simbolo: 'Z' },
     restricciones: [
-      { numero: '1', coeficientes: ['-1', '-1'], relacion: '=', limite: '-4' },
-      { numero: '2', coeficientes: ['1', '0'], relacion: '<=', limite: '3' },
+      restriccion(1, ['-1', '-1'], '=', '-4'),
+      restriccion(2, ['1', '0'], '<=', '3'),
     ],
+    naturaleza: 'fraccionaria',
   },
   simplex: {
     estado: 'optimos_alternativos',

@@ -3,11 +3,9 @@
  * "Serialización: ida y vuelta para todos los casos de 08-casos-de-prueba.md;
  * string inválido → error."
  *
- * Los casos de `__fixtures__/casos.ts` usan el tipo local `ModeloCaso` (ver el
- * comentario de cabecera de ese archivo: son "tipos locales temporales" porque ahí
- * las variables son solo nombres `string[]` y las restricciones no tienen
- * etiqueta/definición). Para probar la serialización del `ModeloLineal` real se
- * adapta cada caso a un modelo de origen `'editor'` completo y válido.
+ * Los casos de `__fixtures__/casos.ts` ya traen un `modelo: ModeloLineal` real y válido
+ * (origen `'ejemplo'`). Para probar el campo `titulo` (que los fixtures no fijan) se clona
+ * cada caso con el título indicado.
  */
 
 import { describe, expect, it } from "vitest";
@@ -16,32 +14,9 @@ import { esquemaModelo } from "./esquemas";
 import { deserializarModelo, hashModelo, serializarModelo } from "./serializacion";
 import type { ModeloLineal } from "./tipos";
 
-/** Adapta un `CasoPrueba` (tipo local de los fixtures) a un `ModeloLineal` válido del dominio. */
+/** Clona el `ModeloLineal` de un `CasoPrueba` con el título indicado, validado contra `esquemaModelo`. */
 function casoAModelo(caso: CasoPrueba, titulo?: string): ModeloLineal {
-  const candidato = {
-    version: 1 as const,
-    titulo,
-    origen: "editor" as const,
-    variables: caso.modelo.variables.map((nombre, indice) => ({
-      nombre,
-      etiqueta: `Opcion${indice + 1}`,
-      definicion: `${nombre} = variable de decisión ${indice + 1}.`,
-    })),
-    objetivo: {
-      sentido: caso.modelo.sentido,
-      coeficientes: caso.modelo.objetivo.coeficientes,
-      simbolo: "Z" as const,
-    },
-    restricciones: caso.modelo.restricciones.map((restriccion, indice) => ({
-      numero: indice + 1,
-      nombre: `Restriccion${indice + 1}`,
-      coeficientes: restriccion.coeficientes,
-      relacion: restriccion.relacion,
-      limite: restriccion.limite,
-    })),
-    naturaleza: caso.modelo.naturaleza,
-  };
-  return esquemaModelo.parse(candidato);
+  return esquemaModelo.parse({ ...caso.modelo, titulo });
 }
 
 describe("serializarModelo / deserializarModelo", () => {
