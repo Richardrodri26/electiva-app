@@ -58,8 +58,8 @@ function verificarSinJerga(textos: readonly string[]): void {
   }
 }
 
-describe("asistente — vocabulario sin jerga técnica (pasos 1 a 4)", () => {
-  it("los textos estáticos de los 4 pasos no usan jerga técnica", () => {
+describe("asistente — vocabulario sin jerga técnica (pasos 1 a 5)", () => {
+  it("los textos estáticos de los 5 pasos no usan jerga técnica", () => {
     verificarSinJerga(TODOS_LOS_TEXTOS_ESTATICOS);
   });
 

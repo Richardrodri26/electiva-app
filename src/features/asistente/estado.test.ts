@@ -7,6 +7,7 @@ import {
   crearBorradorAsistente,
   crearCoeficientesVacios,
   crearRestriccionVacia,
+  limpiarParaCorregirOpciones,
   validarPaso1,
   validarPaso2,
   validarPaso3,
@@ -127,6 +128,49 @@ describe("asistente — Prueba 1 (Sillas/Mesas)", () => {
       expect(resultado.modelo.variables.map((v) => v.etiqueta)).not.toEqual(
         C1.modelo.variables.map((v) => v.etiqueta),
       );
+    }
+  });
+});
+
+describe("asistente — paso 5, 'Corregir las opciones' (decisión #2, T5.2)", () => {
+  it("borra por completo los pasos 2 y 3, conserva el paso 1 y no toca el paso 4", () => {
+    const borrador = borradorPrueba1();
+    const limpio = limpiarParaCorregirOpciones(borrador);
+
+    // Paso 1 intacto (a diferencia del CLI, acá no se vuelve a pedir desde cero).
+    expect(limpio.paso1).toEqual(borrador.paso1);
+
+    // Paso 2 vacío, pero con un hueco por cada opción actual (2: Sillas/Mesas).
+    expect(limpio.paso2).toEqual({ meta: null, coeficientes: ["", ""] });
+
+    // Paso 3 vacío: una sola limitación en blanco, con un hueco por opción.
+    expect(limpio.paso3.restricciones).toHaveLength(1);
+    expect(limpio.paso3.restricciones[0]!.coeficientes).toEqual(["", ""]);
+    expect(limpio.paso3.restricciones[0]!.nombrePersonalizado).toBe("");
+    expect(limpio.paso3.restricciones[0]!.limite).toBe("");
+
+    // Paso 4 (naturaleza) se conserva igual que en el CLI (`case 'variables'` no lo toca).
+    expect(limpio.paso4).toEqual(borrador.paso4);
+  });
+
+  it("dimensiona los nuevos pasos 2 y 3 a la cantidad de opciones ACTUAL del paso 1", () => {
+    const borrador = borradorPrueba1();
+    borrador.paso1.nombresOpciones = ["Sillas", "Mesas", "Estantes"];
+
+    const limpio = limpiarParaCorregirOpciones(borrador);
+
+    expect(limpio.paso2.coeficientes).toEqual(["", "", ""]);
+    expect(limpio.paso3.restricciones[0]!.coeficientes).toEqual(["", "", ""]);
+  });
+
+  it("deja el modelo sin armar hasta que se vuelvan a completar los pasos 2 y 3", () => {
+    const limpio = limpiarParaCorregirOpciones(borradorPrueba1());
+    const resultado = construirModeloDesdeAsistente(limpio);
+
+    expect(resultado.ok).toBe(false);
+    if (!resultado.ok) {
+      // El paso 2 (sin meta ni aportes) es el primero en fallar.
+      expect(resultado.paso).toBe(2);
     }
   });
 });

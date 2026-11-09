@@ -156,6 +156,30 @@ export function crearBorradorAsistente(): BorradorAsistente {
   };
 }
 
+/**
+ * Paso 5 — "Corregir las opciones" (sección `'variables'` de `resumenYConfirmacion.ts`,
+ * ver el `case 'variables'` de `console-program/src/modelBuilder.ts`): al cambiar
+ * nombres/cantidad/unidad, los aportes (paso 2) y las limitaciones (paso 3) quedan
+ * inconsistentes (están indexados a las opciones actuales) y se borran por completo —
+ * decisión #2 confirmada para la tarea T5.2. La naturaleza (paso 4) NO se toca, igual
+ * que en el CLI. El paso 1 tampoco se borra (a diferencia del CLI, que vuelve a
+ * preguntar desde cero): en el stepper el usuario vuelve a verlo con lo que ya había
+ * escrito, y puede editarlo o dejarlo igual antes de continuar.
+ *
+ * Los nuevos borradores vacíos de los pasos 2 y 3 se dimensionan a la cantidad de
+ * opciones ACTUAL de `borrador.paso1` (si el usuario cambia la cantidad al reeditar el
+ * paso 1, `<Asistente>` ya reajusta esos arrays al continuar, igual que en el flujo
+ * normal hacia adelante).
+ */
+export function limpiarParaCorregirOpciones(borrador: BorradorAsistente): BorradorAsistente {
+  const cantidadActual = borrador.paso1.nombresOpciones.length;
+  return {
+    ...borrador,
+    paso2: crearBorradorPaso2(cantidadActual),
+    paso3: crearBorradorPaso3(cantidadActual),
+  };
+}
+
 // ---------------------------------------------------------------------------
 // 3. Resolución de "Otra" (unidad / tipo de limitación)
 // ---------------------------------------------------------------------------

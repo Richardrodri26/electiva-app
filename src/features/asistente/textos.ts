@@ -74,17 +74,64 @@ export const PREGUNTA_NATURALEZA =
   "¿Estas cantidades deben registrarse en unidades completas (no se pueden partir) o pueden ser fraccionarias?";
 
 // ---------------------------------------------------------------------------
+// Paso 5 — console-program/src/flow/resumenYConfirmacion.ts y modelBuilder.ts
+// ---------------------------------------------------------------------------
+
+export const TITULO_PASO_5 = "Revisar";
+
+export const BOTON_RESOLVER_MODELO = "Resolver modelo";
+export const BOTON_CORREGIR = "Corregir…";
+export const BOTON_CANCELAR = "Cancelar";
+
+/**
+ * Las 5 secciones de `OPCIONES_SECCION_MODIFICAR` (`resumenYConfirmacion.ts`), mismo
+ * texto literal y mismo orden. "Todo desde el inicio" es la quinta opción del mismo
+ * menú "Corregir…" (docs/06-ux-ui.md §3.2: "DropdownMenu con las 5 secciones del CLI"),
+ * no una acción separada.
+ */
+export const OPCION_CORREGIR_OPCIONES = "Las opciones que se están comparando (nombres, cantidad, unidad)";
+export const OPCION_CORREGIR_OBJETIVO = "Lo que se quiere lograr y cuánto aporta o cuesta cada opción";
+export const OPCION_CORREGIR_LIMITACIONES = "Las limitaciones registradas";
+export const OPCION_CORREGIR_NATURALEZA = "Si las cantidades son enteras o fraccionarias";
+export const OPCION_CORREGIR_TODO = "Todo desde el inicio";
+
+/**
+ * Aviso LITERAL de `modelBuilder.ts` (caso `'variables'`) al elegir corregir "las
+ * opciones": como cambia la cantidad/los nombres, también hay que volver a indicar el
+ * aporte de cada una y los datos de las limitaciones (decisión #2 confirmada para T5.2).
+ */
+export const AVISO_CORREGIR_OPCIONES =
+  "Como vas a cambiar las opciones que se comparan, también vas a tener que volver a indicar cuánto aporta cada una y los datos de las limitaciones.";
+
+export const TITULO_DIALOGO_CANCELAR = "¿Cancelar y borrar lo registrado?";
+export const DESCRIPCION_DIALOGO_CANCELAR =
+  "Se va a borrar todo lo que registraste en el asistente. Esta acción no se puede deshacer.";
+export const BOTON_CONFIRMAR_CANCELAR = "Sí, cancelar";
+export const BOTON_VOLVER_DIALOGO = "Volver";
+
+/**
+ * Banner de borrador sin terminar (docs/06-ux-ui.md §3.2). docs/06 cita el título en
+ * tono "tú" ("Tienes un modelo sin terminar"), pero T5.1 fijó "usted" para todo el
+ * asistente: se usa acá la forma "usted" por consistencia con el resto de los textos
+ * (ver nota de ambigüedad en el resumen de la tarea T5.2).
+ */
+export const TITULO_BANNER_BORRADOR = "Tiene un modelo sin terminar";
+export const BOTON_CONTINUAR_BORRADOR = "Continuar";
+export const BOTON_DESCARTAR_BORRADOR = "Descartar";
+
+// ---------------------------------------------------------------------------
 // Navegación — docs/06-ux-ui.md §3.2
 // ---------------------------------------------------------------------------
 
 export const BOTON_ATRAS = "Atrás";
 export const BOTON_CONTINUAR = "Continuar";
 
-export const TITULOS_PASOS: readonly [string, string, string, string] = [
+export const TITULOS_PASOS: readonly [string, string, string, string, string] = [
   TITULO_PASO_1,
   TITULO_PASO_2,
   TITULO_PASO_3,
   TITULO_PASO_4,
+  TITULO_PASO_5,
 ];
 
 /**
@@ -112,4 +159,21 @@ export const TODOS_LOS_TEXTOS_ESTATICOS: readonly string[] = [
   PREGUNTA_NATURALEZA,
   BOTON_ATRAS,
   BOTON_CONTINUAR,
+  TITULO_PASO_5,
+  BOTON_RESOLVER_MODELO,
+  BOTON_CORREGIR,
+  BOTON_CANCELAR,
+  OPCION_CORREGIR_OPCIONES,
+  OPCION_CORREGIR_OBJETIVO,
+  OPCION_CORREGIR_LIMITACIONES,
+  OPCION_CORREGIR_NATURALEZA,
+  OPCION_CORREGIR_TODO,
+  AVISO_CORREGIR_OPCIONES,
+  TITULO_DIALOGO_CANCELAR,
+  DESCRIPCION_DIALOGO_CANCELAR,
+  BOTON_CONFIRMAR_CANCELAR,
+  BOTON_VOLVER_DIALOGO,
+  TITULO_BANNER_BORRADOR,
+  BOTON_CONTINUAR_BORRADOR,
+  BOTON_DESCARTAR_BORRADOR,
 ];
