@@ -63,6 +63,12 @@ describe("ValorM", () => {
       expect(r.a.igual(Fraccion.de(4))).toBe(true);
       expect(r.b.igual(Fraccion.de(6))).toBe(true);
     });
+
+    it("negar", () => {
+      const r = v(2, -3).negar();
+      expect(r.a.igual(Fraccion.de(-2))).toBe(true);
+      expect(r.b.igual(Fraccion.de(3))).toBe(true);
+    });
   });
 
   describe("formato de texto", () => {

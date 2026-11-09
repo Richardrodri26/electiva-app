@@ -85,6 +85,52 @@ describe("estandarizar", () => {
       expect(tablaInicial.filaZ.map((v) => v.aTexto())).toEqual(C12.zAjustada!.slice(0, -1));
       expect(tablaInicial.valorZ.aTexto()).toBe(C12.zAjustada!.at(-1));
     });
+
+    it("C5 (dos artificiales): cada operación 'eliminar' del ajuste de M identifica su filaOrigen (A1, A2)", () => {
+      const { preparacion } = estandarizar(C5.modelo);
+      const ajuste = preparacion.find((p) => p.tipo === "ajuste_m");
+      expect(ajuste).toBeDefined();
+      if (ajuste?.tipo !== "ajuste_m") throw new Error("tipo inesperado");
+
+      expect(ajuste.operaciones).toHaveLength(2);
+      expect(ajuste.operaciones.map((op) => (op.tipo === "eliminar" ? op.filaOrigen : undefined))).toEqual([
+        "A1",
+        "A2",
+      ]);
+    });
+
+    it("C11 (mixto): las operaciones del ajuste de M identifican A1 y A3 (no S2, que no es artificial)", () => {
+      const { preparacion } = estandarizar(C11.modelo);
+      const ajuste = preparacion.find((p) => p.tipo === "ajuste_m");
+      expect(ajuste).toBeDefined();
+      if (ajuste?.tipo !== "ajuste_m") throw new Error("tipo inesperado");
+
+      expect(ajuste.operaciones.map((op) => (op.tipo === "eliminar" ? op.filaOrigen : undefined))).toEqual([
+        "A1",
+        "A3",
+      ]);
+    });
+  });
+
+  describe("forma estándar completa (docs/04 §2.2, docs/06 'Preparación ▸ 2 Forma estándar')", () => {
+    it("C5: registra el paso forma_estandar con el sistema completo y el objetivo con M sin canonizar", () => {
+      const { preparacion, tablaInicial } = estandarizar(C5.modelo);
+      const paso = preparacion.find((p) => p.tipo === "forma_estandar");
+      expect(paso).toBeDefined();
+      if (paso?.tipo !== "forma_estandar") throw new Error("tipo inesperado");
+
+      // Mismo sistema de ecuaciones que la tabla inicial (el ajuste de M no toca las
+      // filas de restricción, solo la fila Z).
+      expect(paso.filas.map((f) => f.map((c) => c.aTexto()))).toEqual(
+        tablaInicial.filas.map((f) => f.map((c) => c.aTexto())),
+      );
+      expect(paso.ladoDerecho.map((r) => r.aTexto())).toEqual(tablaInicial.ladoDerecho.map((r) => r.aTexto()));
+
+      // Objetivo en la forma Z = Σcⱼxⱼ + 0·Sᵢ + M·Aᵢ (min, docs/04 §2.2): negación exacta
+      // de la fila Z canónica (C5.zInicial sin el R final), columna por columna.
+      expect(paso.objetivo.map((v) => v.aTexto())).toEqual(["2", "3", "0", "0", "M", "M"]);
+      expect(paso.variables).toEqual(["x1", "x2", "S1", "S2", "A1", "A2"]);
+    });
   });
 
   describe("forma estándar: toda fracción queda normalizada", () => {

@@ -12,6 +12,7 @@ import {
   CASOS,
   type CasoPrueba,
 } from "../__fixtures__/casos";
+import type { ModeloLineal } from "../modelo/tipos";
 import { detalleCeldas, resolverSimplex } from "./resolver";
 import type { ColumnaTabla, Solucion, TablaSimplex } from "./tipos";
 
@@ -53,13 +54,25 @@ describe("resolverSimplex — oráculo docs/08-casos-de-prueba.md", () => {
       expect(resultado.solucion).toBeUndefined();
     }
 
-    if (caso.simplex.avisos) {
-      expect(resultado.avisos.map((a) => a.codigo)).toEqual(expect.arrayContaining(caso.simplex.avisos));
-    }
+    // Comparación estricta (no `arrayContaining`): detecta tanto avisos de más que el
+    // código emite y el fixture no declara, como avisos de menos.
+    expect(resultado.avisos.map((a) => a.codigo)).toEqual(caso.simplex.avisos ?? []);
 
     if (caso.simplex.alternativa) {
       esperarSolucion(resultado.solucionAlternativa, caso.simplex.alternativa.solucion, resultado.columnas);
       expect(resultado.solucionAlternativa!.z.aTexto()).toBe(caso.simplex.alternativa.z);
+
+      // El pivoteo extra que produce la solución alternativa también debe quedar
+      // registrado paso a paso (entra/sale/pivote), no solo el resultado final.
+      expect(resultado.alternativa).toBeDefined();
+      const decisionAlternativa = resultado.alternativa!.decision;
+      expect(caso.simplex.alternativa.traza).toEqual([
+        {
+          entra: decisionAlternativa.entra,
+          sale: decisionAlternativa.sale ?? null,
+          pivote: decisionAlternativa.elementoPivote?.aTexto() ?? null,
+        },
+      ]);
     }
   });
 });
@@ -136,6 +149,58 @@ describe("resolverSimplex — casos límite", () => {
     const resultado = resolverSimplex(C1.modelo, { maxIteraciones: 0 });
     expect(resultado.estado).toBe("limite_iteraciones");
     expect(resultado.avisos.some((a) => a.codigo === "posible_ciclo")).toBe(true);
+
+    // Decisión "fantasma" (hallazgo #9): el pivoteo propuesto nunca se ejecuta, así que
+    // sale/filaPivote/elementoPivote deben quedar ausentes (la UI no debe mostrar un
+    // pivoteo que no ocurrió).
+    const ultima = resultado.tablas[resultado.tablas.length - 1]!;
+    expect(ultima.decision!.sale).toBeUndefined();
+    expect(ultima.decision!.filaPivote).toBeUndefined();
+    expect(ultima.decision!.elementoPivote).toBeUndefined();
+    expect(ultima.decision!.operaciones).toEqual([]);
+  });
+
+  // Regresión: bug de correctitud donde, si ninguna fila participaba del criterio de
+  // salida, el motor diagnosticaba siempre `no_acotado` sin chequear si había una
+  // artificial básica positiva — en cuyo caso el diagnóstico correcto es `infactible`
+  // (docs/04 §3.3, §4.1). Modelo de contraejemplo:
+  //   max Z = x1
+  //   R1: x2 >= 1
+  //   R2: x2 <= 0
+  //   R3: -x1 + x2 <= 10
+  // Tras el ajuste de M entra x2 (razones 1, 0, 10), sale S2 (degenerado). En la tabla
+  // siguiente entra x1, cuya columna no tiene coeficiente positivo en ninguna fila →
+  // ninguna fila participa, pero A1 sigue básica con valor 1 > 0 → infactible.
+  it("infactible detectado cuando ninguna fila participa del criterio de salida (no es no_acotado)", () => {
+    const modelo: ModeloLineal = {
+      version: 1,
+      origen: "ejemplo",
+      variables: [
+        { nombre: "x1", etiqueta: "x1", definicion: "x1 = variable de decisión 1." },
+        { nombre: "x2", etiqueta: "x2", definicion: "x2 = variable de decisión 2." },
+      ],
+      objetivo: { sentido: "max", coeficientes: ["1", "0"], simbolo: "Z" },
+      restricciones: [
+        { numero: 1, nombre: "Restricción 1", coeficientes: ["0", "1"], relacion: ">=", limite: "1" },
+        { numero: 2, nombre: "Restricción 2", coeficientes: ["0", "1"], relacion: "<=", limite: "0" },
+        { numero: 3, nombre: "Restricción 3", coeficientes: ["-1", "1"], relacion: "<=", limite: "10" },
+      ],
+      naturaleza: "fraccionaria",
+    };
+
+    const resultado = resolverSimplex(modelo);
+
+    expect(resultado.estado).toBe("infactible");
+    expect(resultado.solucion).toBeUndefined();
+    expect(trazaDe(resultado.tablas)).toEqual([
+      { entra: "x2", sale: "S2", pivote: "1" },
+      { entra: "x1", sale: null, pivote: null },
+    ]);
+
+    const ultima = resultado.tablas[resultado.tablas.length - 1]!;
+    const idxA1 = ultima.base.indexOf("A1");
+    expect(idxA1).toBeGreaterThanOrEqual(0);
+    expect(ultima.ladoDerecho[idxA1]!.esPositiva()).toBe(true);
   });
 });
 
