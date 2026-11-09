@@ -458,9 +458,17 @@ export const C8: CasoPrueba = {
       { entra: 'x2', sale: null, pivote: null },
     ],
   },
+  // docs/08 solo dice "Gráfico: no_acotado", sin enumerar vértices (no los numera para
+  // este caso). Vértices completados cruzando el motor ya verificado (`resolverGrafico`,
+  // 19 tests en resolver.test.ts) con verificación manual por Cramer: el modelo (max
+  // Z = x1 + x2, R1: x1 - x2 <= 1, x1,x2 >= 0) es una cuña con dos vértices finitos,
+  // (0,0) y (1,0); la dirección de recesión (0,1) mejora Z sin cota -> no_acotado.
   grafico: {
     estado: 'no_acotado',
-    vertices: [],
+    vertices: [
+      { punto: ['0', '0'], z: '0' },
+      { punto: ['1', '0'], z: '1' },
+    ],
   },
 };
 
@@ -495,10 +503,16 @@ export const C9: CasoPrueba = {
       z: '16',
     },
   },
+  // docs/08 solo transcribe el segmento óptimo (0,4)-(6,1); el polígono real tiene 4
+  // vértices. Completado cruzando el motor ya verificado (`resolverGrafico`) con
+  // verificación manual por Cramer sobre el modelo (x1 + 2x2 <= 8, x1 <= 6, x1,x2 >= 0):
+  // (0,0), (6,0), (6,1) y (0,4); los dos últimos empatan en Z = 16, igual que la prosa.
   grafico: {
     vertices: [
-      { punto: ['0', '4'], z: '16' },
+      { punto: ['0', '0'], z: '0' },
+      { punto: ['6', '0'], z: '12' },
       { punto: ['6', '1'], z: '16' },
+      { punto: ['0', '4'], z: '16' },
     ],
     nota: 'Segmento óptimo entre (0,4) y (6,1).',
   },
