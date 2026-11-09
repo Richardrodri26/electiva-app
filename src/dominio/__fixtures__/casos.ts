@@ -425,6 +425,10 @@ export const C7: CasoPrueba = {
   simplex: {
     estado: 'infactible',
     traza: [{ entra: 'x1', sale: 'S1', pivote: '1' }],
+    // La fila Z tras el ajuste de M es [-1-M, -1-M, 0, M, 0 | -5M]: empate exacto de
+    // entrada entre x1 y x2 (se elige x1, más a la izquierda). docs/08 no lo transcribe,
+    // pero es una omisión del documento: el aviso 'empate' sí corresponde.
+    avisos: ['empate'],
     notas: ['Termina con A2 = 3 básica.'],
   },
   grafico: {
@@ -457,6 +461,10 @@ export const C8: CasoPrueba = {
       // docs/08: "entra x2, ninguna razón válida"; no hay pivote en esta iteración.
       { entra: 'x2', sale: null, pivote: null },
     ],
+    // Fila Z inicial [-1, -1, 0 | 0]: empate exacto de entrada entre x1 y x2 (se elige
+    // x1, más a la izquierda). docs/08 no lo transcribe, pero es una omisión del
+    // documento: el aviso 'empate' sí corresponde.
+    avisos: ['empate'],
   },
   // docs/08 solo dice "Gráfico: no_acotado", sin enumerar vértices (no los numera para
   // este caso). Vértices completados cruzando el motor ya verificado (`resolverGrafico`,
@@ -616,6 +624,16 @@ export const C12: CasoPrueba = {
     z: '4',
     avisos: ['empate'],
     notas: ['S2 no básica con coste reducido 0.'],
+    // docs/08 solo dice "optimos_alternativos (S2 no básica con coste reducido 0)", sin
+    // transcribir el pivoteo extra. Completado cruzando el motor ya verificado
+    // (resolverSimplex, 242 tests en resolver.test.ts): entra S2 (único candidato con
+    // coste reducido 0), sale x1 (única fila con coeficiente positivo en esa columna) →
+    // vértice alternativo (0,4), consistente con el segmento óptimo del gráfico.
+    alternativa: {
+      traza: [{ entra: 'S2', sale: 'x1', pivote: '1' }],
+      solucion: { x2: '4', S2: '3' },
+      z: '4',
+    },
   },
   zAjustada: ['-1 - M', '-1 - M', '0', '0', '-4M'],
   grafico: {
