@@ -167,6 +167,18 @@ export function estandarizar(modelo: ModeloLineal): ResultadoEstandarizacion {
     return new ValorM(Fraccion.CERO);
   });
   const valorZCanonico = new ValorM(Fraccion.CERO);
+
+  // §2.2 (diapositiva 8) / docs/06 "Preparación ▸ 2 Forma estándar": sistema completo
+  // (todas las variables en cada ecuación) con el objetivo todavía en la forma
+  // `Z = Σcⱼxⱼ + 0·Sᵢ ∓ M·Aᵢ` (negación de la fila Z canónica, antes de pasar a `z - ... = 0`).
+  preparacion.push({
+    tipo: "forma_estandar",
+    filas,
+    ladoDerecho,
+    objetivo: filaZCanonica.map((v) => v.negar()),
+    variables: columnas.map((c) => c.id),
+  });
+
   preparacion.push({ tipo: "fila_z_canonica", filaZ: filaZCanonica });
 
   // §2.5: ajuste de M — eliminar M de las columnas con artificial básica.
@@ -183,7 +195,7 @@ export function estandarizar(modelo: ModeloLineal): ResultadoEstandarizacion {
     if (esValorMCero(coefEnZ)) {
       return;
     }
-    operacionesAjuste.push({ tipo: "eliminar", fila: "Z", factor: coefEnZ });
+    operacionesAjuste.push({ tipo: "eliminar", fila: "Z", factor: coefEnZ, filaOrigen: nombreBasica });
     const filaI = filas[i]!;
     filaZ = filaZ.map((valor, j) => valor.restar(coefEnZ.multiplicarPor(filaI[j]!)));
     valorZ = valorZ.restar(coefEnZ.multiplicarPor(ladoDerecho[i]!));

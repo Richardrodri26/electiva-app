@@ -42,6 +42,24 @@ function esValorMPositivo(v: ValorM): boolean {
   return !v.esNegativo() && !esValorMCero(v);
 }
 
+/**
+ * `true` si alguna variable BÁSICA de tipo `artificial` tiene valor (lado derecho) > 0
+ * (docs/04 §4.1). Se usa tanto al alcanzar la optimalidad como cuando ninguna fila
+ * participa del criterio de salida (§3.3): en ambos casos indica que la Fase I implícita
+ * (sacar las artificiales de la base) terminó con una artificial positiva, o sea, el
+ * modelo original es `infactible`.
+ */
+function tieneArtificialBasicaPositiva(
+  base: readonly string[],
+  ladoDerecho: readonly Fraccion[],
+  columnas: readonly ColumnaTabla[],
+): boolean {
+  return base.some((nombre, i) => {
+    const col = columnas.find((c) => c.id === nombre);
+    return col?.tipo === "artificial" && ladoDerecho[i]!.esPositiva();
+  });
+}
+
 // ---------------------------------------------------------------------------
 // §3.1/§3.2 — condición de optimalidad y variable de entrada
 // ---------------------------------------------------------------------------
@@ -167,7 +185,7 @@ function pivotear(tabla: TablaSimplex, columnaPivote: number, filaPivote: number
       ladoDerecho.push(tabla.ladoDerecho[i]!);
       continue;
     }
-    operaciones.push({ tipo: "eliminar", fila: tabla.base[i]!, factor: coef });
+    operaciones.push({ tipo: "eliminar", fila: tabla.base[i]!, factor: coef, filaOrigen: entranteId });
     filas.push(tabla.filas[i]!.map((valor, j) => valor.restar(coef.multiplicar(nuevaFilaPivote[j]!))));
     ladoDerecho.push(tabla.ladoDerecho[i]!.restar(coef.multiplicar(nuevoRhsPivote)));
   }
@@ -176,7 +194,7 @@ function pivotear(tabla: TablaSimplex, columnaPivote: number, filaPivote: number
   let filaZ = tabla.filaZ;
   let valorZ = tabla.valorZ;
   if (!esValorMCero(coefZ)) {
-    operaciones.push({ tipo: "eliminar", fila: "Z", factor: coefZ });
+    operaciones.push({ tipo: "eliminar", fila: "Z", factor: coefZ, filaOrigen: entranteId });
     filaZ = tabla.filaZ.map((valor, j) => valor.restar(coefZ.multiplicarPor(nuevaFilaPivote[j]!)));
     valorZ = tabla.valorZ.restar(coefZ.multiplicarPor(nuevoRhsPivote));
   }
@@ -261,18 +279,26 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
         operaciones: [],
       };
       tablas.push({ ...actual, decision });
-      estado = "no_acotado";
+      // Ninguna fila participó de la razón mínima: si no hay una artificial básica
+      // positiva, el modelo no tiene cota (no_acotado, docs/04 §3.3); si la hay, la
+      // Fase I implícita ya terminó con esa artificial > 0 y el modelo es infactible
+      // (docs/04 §4.1), nunca no_acotado (bug corregido: antes se reportaba siempre
+      // no_acotado sin este chequeo).
+      estado = tieneArtificialBasicaPositiva(actual.base, actual.ladoDerecho, columnas)
+        ? "infactible"
+        : "no_acotado";
       break;
     }
 
     if (pivotes >= maxIteraciones) {
+      // Se alcanzó el límite de iteraciones antes de ejecutar el pivoteo: se registra
+      // qué columna hubiera entrado (para diagnóstico), pero `sale`/`filaPivote`/
+      // `elementoPivote` quedan ausentes porque ese pivoteo nunca se ejecutó — evita que
+      // la UI muestre un pivoteo "fantasma" que no ocurrió.
       const decision: DecisionIteracion = {
         entra: columnas[entrada.indice]!.id,
         columnaPivote: entrada.indice,
         razones: salida.razones,
-        sale: actual.base[salida.indiceFila]!,
-        filaPivote: salida.indiceFila,
-        elementoPivote: actual.filas[salida.indiceFila]![entrada.indice]!,
         empateEntrada: entrada.empate,
         empateSalida: salida.empate,
         operaciones: [],
@@ -298,7 +324,9 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
     };
     tablas.push({ ...actual, decision });
 
-    if (saliente.startsWith("A")) {
+    // No depender de la convención de nombres ("A..."): usar el tipo real de columna.
+    const columnaSaliente = columnas.find((c) => c.id === saliente);
+    if (columnaSaliente?.tipo === "artificial") {
       artificialesSalidas.add(saliente);
     }
 
@@ -315,13 +343,11 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
 
   let solucion: Solucion | undefined;
   let solucionAlternativa: Solucion | undefined;
+  let alternativa: ResultadoSimplex["alternativa"];
 
   if (estado === "optimo") {
     const tablaFinal = tablas[tablas.length - 1]!;
-    const esArtificialInfactible = tablaFinal.base.some((nombre, i) => {
-      const col = columnas.find((c) => c.id === nombre);
-      return col?.tipo === "artificial" && tablaFinal.ladoDerecho[i]!.esPositiva();
-    });
+    const esArtificialInfactible = tieneArtificialBasicaPositiva(tablaFinal.base, tablaFinal.ladoDerecho, columnas);
 
     if (esArtificialInfactible) {
       estado = "infactible";
@@ -331,13 +357,14 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
       const columnaAlternativa = buscarColumnaAlternativa(tablaFinal.filaZ, columnas, tablaFinal.base);
       if (columnaAlternativa !== null) {
         estado = "optimos_alternativos";
+        const entranteAlternativo = columnas[columnaAlternativa]!.id;
         const salidaAlternativa = elegirSalida(tablaFinal.filas, tablaFinal.ladoDerecho, columnaAlternativa);
         if (salidaAlternativa.indiceFila !== null) {
           const pivoteAlternativo = pivotear(
             tablaFinal,
             columnaAlternativa,
             salidaAlternativa.indiceFila,
-            columnas[columnaAlternativa]!.id,
+            entranteAlternativo,
           );
           solucionAlternativa = construirSolucion(
             pivoteAlternativo.base,
@@ -345,6 +372,31 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
             pivoteAlternativo.valorZ,
             columnas,
           );
+
+          // Registrar el pivoteo extra paso a paso (decisión + tabla resultante), no
+          // solo el resultado final: la UI necesita mostrarlo en "Ver solución alternativa".
+          const decisionAlternativa: DecisionIteracion = {
+            entra: entranteAlternativo,
+            columnaPivote: columnaAlternativa,
+            razones: salidaAlternativa.razones,
+            sale: tablaFinal.base[salidaAlternativa.indiceFila]!,
+            filaPivote: salidaAlternativa.indiceFila,
+            elementoPivote: tablaFinal.filas[salidaAlternativa.indiceFila]![columnaAlternativa]!,
+            empateEntrada: false,
+            empateSalida: salidaAlternativa.empate,
+            operaciones: pivoteAlternativo.operaciones,
+          };
+          alternativa = {
+            decision: decisionAlternativa,
+            tabla: {
+              indice: tablaFinal.indice + 1,
+              base: pivoteAlternativo.base,
+              filas: pivoteAlternativo.filas,
+              ladoDerecho: pivoteAlternativo.ladoDerecho,
+              filaZ: pivoteAlternativo.filaZ,
+              valorZ: pivoteAlternativo.valorZ,
+            },
+          };
         }
         if (salidaAlternativa.empate) huboEmpate = true;
       }
@@ -360,7 +412,7 @@ export function resolverSimplex(modelo: ModeloLineal, opciones?: OpcionesSimplex
     limiteIteraciones: estado === "limite_iteraciones",
   });
 
-  return { estado, preparacion, columnas, tablas, solucion, solucionAlternativa, avisos };
+  return { estado, preparacion, columnas, tablas, solucion, solucionAlternativa, alternativa, avisos };
 }
 
 // ---------------------------------------------------------------------------

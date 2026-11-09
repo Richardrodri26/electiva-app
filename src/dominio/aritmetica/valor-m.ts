@@ -27,6 +27,10 @@ export class ValorM {
     return new ValorM(this.a.multiplicar(f), this.b.multiplicar(f));
   }
 
+  negar(): ValorM {
+    return new ValorM(this.a.negar(), this.b.negar());
+  }
+
   /**
    * Orden: se compara primero el coeficiente de `M` (`b`) y, si empatan, el
    * término constante (`a`).

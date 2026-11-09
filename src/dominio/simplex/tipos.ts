@@ -45,7 +45,18 @@ export interface Solucion {
  */
 export type OperacionFila =
   | { tipo: "normalizar"; fila: string; divisor: Fraccion }
-  | { tipo: "eliminar"; fila: string; factor: Fraccion | ValorM };
+  | {
+      tipo: "eliminar";
+      fila: string;
+      factor: Fraccion | ValorM;
+      /**
+       * Fila (variable básica) de la que se restó el múltiplo, ej. "A1" en el ajuste de M
+       * o la variable entrante en un pivoteo Gauss-Jordan. Permite a la UI mostrar
+       * "Fila X ← Fila X − (factor)·Fila {filaOrigen}" sin ambigüedad cuando hay varias
+       * artificiales (docs/04 §2.5, §3.5).
+       */
+      filaOrigen: string;
+    };
 
 /**
  * La decisión tomada en una tabla: qué entra, qué sale y cómo se pivotea, para pasar
@@ -123,6 +134,20 @@ export type PasoPreparacion =
       basicaInicial: string;
     }
   | {
+      /**
+       * §2.2 (diapositiva 8) / docs/06 "Preparación ▸ 2 Forma estándar": el sistema
+       * completo ya con todas las variables (x, S, A) en cada ecuación —coeficiente 0
+       * donde no aparece— y la función objetivo en la forma `Z = Σcⱼxⱼ + 0·Sᵢ ∓ M·Aᵢ`
+       * (sin pasar aún a la forma canónica `z - ... = 0` de §2.4). `variables` es la
+       * lista completa de columnas (en el orden de §2.3), para la condición `x,S,A ≥ 0`.
+       */
+      tipo: "forma_estandar";
+      filas: Fraccion[][];
+      ladoDerecho: Fraccion[];
+      objetivo: ValorM[];
+      variables: string[];
+    }
+  | {
       /** §2.4: fila Z canónica (`z - Σcⱼxⱼ ∓ M·Aᵢ = 0`), antes de eliminar M de las básicas. */
       tipo: "fila_z_canonica";
       filaZ: ValorM[];
@@ -148,6 +173,17 @@ export interface OpcionesSimplex {
   maxIteraciones?: number;
 }
 
+/**
+ * Detalle completo del pivoteo extra que produce `solucionAlternativa` (docs/04 §4.3):
+ * la decisión tomada sobre la última tabla (`tablas[tablas.length - 1]`) y la tabla
+ * resultante de ese pivoteo, para que la UI pueda mostrarlo paso a paso (no solo el
+ * resultado final) en el botón "Ver solución alternativa".
+ */
+export interface PivoteoAlternativo {
+  decision: DecisionIteracion;
+  tabla: TablaSimplex;
+}
+
 export interface ResultadoSimplex {
   estado: EstadoSimplex;
   /** Pasos de la preparación (§2), en orden. */
@@ -160,5 +196,7 @@ export interface ResultadoSimplex {
   solucion?: Solucion;
   /** Presente si `estado = optimos_alternativos` y el pivoteo adicional fue posible (§4.3). */
   solucionAlternativa?: Solucion;
+  /** Presente junto con `solucionAlternativa`: el pivoteo paso a paso que la produjo. */
+  alternativa?: PivoteoAlternativo;
   avisos: Aviso[];
 }
