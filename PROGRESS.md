@@ -4,8 +4,8 @@
 > sigue siendo `AGENTS.md` + `docs/01..08`. Este documento existe para que un agente nuevo, sin memoria de
 > las sesiones anteriores, pueda retomar el trabajo sin tener que re-descubrir todo desde cero.
 >
-> Último commit al cerrar esta sesión: `ab4c62d`. Árbol de trabajo limpio. 28 archivos de test, 410 tests
-> pasando, 8 skipped (esperados). `pnpm lint` y `pnpm typecheck` sin errores. **Nunca se corrió `pnpm build`**
+> Estado al cerrar esta sesión: 414 tests unitarios pasando (8 skipped, esperados) y 16 E2E de Playwright
+> pasando (`pnpm test:e2e`). `pnpm lint` y `pnpm typecheck` sin errores. **Nunca se corrió `pnpm build`**
 > (regla global del usuario: "Never build after changes" — no la rompas).
 
 ## Cómo se trabajó (para que el agente nuevo mantenga el estilo)
@@ -40,19 +40,21 @@
 | T5.2 | Asistente, paso 5 (revisar y corregir) | ✅ |
 | F6 | Resultados: layout + las 4 pestañas (Modelo, Simplex, Gráfico, Interpretación) | ✅ |
 | T7.1 | Historial de modelos resueltos (autoguardado, Sheet, renombrar/eliminar) | ✅ |
+| T7.2 | Copiar como texto e imprimir (`vista-impresion.tsx`, solo visible al imprimir); recorte de rectas al dominio en la gráfica | ✅ |
+| Rutas | Inicio (`/`), `/modelo/asistente` y `/modelo/editor` reales (las `/dev/*` quedan como páginas de revisión) | ✅ |
+| T8.2 | E2E Playwright en `tests/e2e/` (los 5 escenarios de docs/07) | ✅ |
+| T8.3 | README en español | ✅ |
 
 ## Qué falta
 
 | Tarea | Depende de | Qué es |
 |---|---|---|
-| **T7.2** | F6 (listo) | Compartir y exportar: ítems restantes del menú "⋯" en `src/features/resultados/resultados-layout.tsx` — "Copiar como texto" (usar `formatearModeloTexto` de `src/dominio/modelo/formato.ts`) e "Imprimir" (CSS de impresión: ocultar navegación/controles, imprimir el modelo + **todas** las tablas Simplex, no solo la iteración visible + la gráfica). "Copiar enlace" YA está implementado (lo hizo T6.1 de forma adelantada). Ver `docs/06-ux-ui.md` §3.4 y §5. **Cuidado**: este archivo (`resultados-layout.tsx`) ya lo tocaron T6.1 y T7.1 — revisá el diff actual antes de editarlo. |
-| **T8.1** | Todo lo anterior | Accesibilidad y responsive: auditoría Lighthouse (≥90 en Accesibilidad y Buenas Prácticas), objetivos táctiles ≥44px, 375/768/1024/1440px. Herramienta: `chrome-devtools` MCP (`lighthouse_audit`) o Playwright. |
-| **T8.2** | Todo lo anterior | E2E con Playwright: los 5 escenarios de `docs/07-plan-de-implementacion.md` T8.2 (no están resumidos en Engram, hay que leer el doc). |
-| **T8.3** | — | README en español: instalación, comandos, estructura. |
-| (pendiente, no bloqueante) | — | Sección "Recientes" en la pantalla de Inicio (`src/app/page.tsx` sigue siendo el scaffold default de `create-next-app` — nunca se construyó la pantalla de Inicio real; no hay tarea explícita para eso en docs/07, revisar si hace falta crearla antes de T8). |
+| **T8.1** | Todo lo anterior | Accesibilidad y responsive: Lighthouse (≥90 en Accesibilidad y Buenas Prácticas), objetivos táctiles ≥44px, 375/768/1024/1440px. Incluye corregir los enlaces hechos con `<Button render={<Link/>}>` que se anuncian como botones (`<a role="button">`). Ver commits recientes por si ya se hizo. |
+| (decisión pendiente) | — | Tono: `docs/06` usa "tú", el proyecto pide "usted", y el editor/encabezado usan voseo ("Completá…"). Inicio usa "usted". Falta que el usuario decida si se unifica todo. |
+| (decisión pendiente) | — | "Cancelar" en el asistente solo vuelve al paso 1; `docs/06` dice "vuelve al inicio". |
 
 ### Orden sugerido
-T7.2 → (T8.1 ∥ T8.2 ∥ T8.3, las tres son independientes entre sí una vez que el resto está listo).
+Cerrar T8.1 y resolver las dos decisiones pendientes; no queda otra tarea del plan de docs/07.
 
 ## Decisiones de arquitectura ya confirmadas con el usuario (no las vuelvas a preguntar)
 
