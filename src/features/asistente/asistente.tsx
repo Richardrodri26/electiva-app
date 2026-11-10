@@ -30,6 +30,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
@@ -89,6 +90,7 @@ function obtenerInstantaneaServidor(): BorradorGuardado | null {
 }
 
 export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
+  const router = useRouter();
   const { paso, irAPaso } = usePasoAsistente();
   const [borrador, setBorrador] = useState<BorradorAsistente>(() => crearBorradorAsistente());
   const [pasoMaximoAlcanzado, setPasoMaximoAlcanzado] = useState<NumeroPasoAsistente>(1);
@@ -243,8 +245,8 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
     borrar(CLAVE_BORRADOR_ASISTENTE);
     setBorrador(crearBorradorAsistente());
     setCorrigiendoSeccion(false);
-    retrocederA(1);
     haIniciadoRef.current = false;
+    router.push("/");
   }
 
   function continuarBorradorGuardado(): void {
