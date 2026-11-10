@@ -90,8 +90,8 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
   const sinRegion = datos.estado === "infactible";
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr]">
-      <Card>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] print:grid-cols-1">
+      <Card className="print:mx-auto print:w-full print:max-w-[14cm]">
         <CardHeader>
           <CardTitle className="text-sm font-semibold text-muted-foreground">Gráfica</CardTitle>
         </CardHeader>
@@ -113,7 +113,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
         <PanelResultado resultado={datos} formato={formato} />
 
         {!sinRegion ? (
-          <Card>
+          <Card className="print:hidden">
             <CardHeader>
               <CardTitle className="text-sm font-semibold text-muted-foreground">Controles</CardTitle>
             </CardHeader>

@@ -42,7 +42,7 @@ export function VistaModelo({ modelo, formato }: VistaModeloProps) {
 
   return (
     <div className="flex flex-col gap-6 rounded-xl border border-border bg-card p-4 sm:p-6">
-      <div className="flex justify-end">
+      <div className="flex justify-end print:hidden">
         <Button variant="outline" size="sm" onClick={copiarComoTexto}>
           <Copy />
           Copiar como texto

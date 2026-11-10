@@ -28,7 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Expresion } from "@/components/comunes/expresion";
-import { generarTokensExpresion } from "@/dominio/modelo/formato";
+import { formatearModeloTexto, generarTokensExpresion } from "@/dominio/modelo/formato";
 import { serializarModelo } from "@/dominio/modelo/serializacion";
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
 import { DialogoGuardarConNombre } from "@/features/historial/dialogo-guardar-con-nombre";
@@ -46,6 +46,7 @@ import type { Vista } from "@/lib/url-state";
 import { ColumnaModelo } from "./columna-modelo";
 import { useSolucionSimplex } from "./use-solucion-simplex";
 import { VistaGrafico } from "./vista-grafico";
+import { VistaImpresion } from "./vista-impresion";
 import { VistaInterpretacion } from "./vista-interpretacion";
 import { VistaModelo } from "./vista-modelo";
 import { VistaSimplex } from "./vista-simplex";
@@ -98,11 +99,26 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
     }
   }
 
-  const tokensTitulo = generarTokensExpresion(modelo.objetivo.coeficientes, modelo.variables, formato);
+  async function copiarComoTexto(): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(formatearModeloTexto(modelo, formato));
+      toast.success("Copiado");
+    } catch {
+      toast.error("No se pudo copiar el texto");
+    }
+  }
+
+  function imprimir(): void {
+    window.print();
+  }
+
+  const tokensTitulo =generarTokensExpresion(modelo.objetivo.coeficientes, modelo.variables, formato);
   const hrefEditor = `/modelo/editor?m=${serializarModelo(modelo)}`;
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
+    <VistaImpresion modelo={modelo} formato={formato} />
+    <div className="flex flex-col gap-4 print:hidden">
       <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" nativeButton={false} render={<Link href={hrefEditor}>← Editar</Link>} />
@@ -142,14 +158,11 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
               }
             />
             <DropdownMenuContent align="end">
-              {/* "Copiar como texto" e "Imprimir" son STUBS (T7.2, docs/06-ux-ui.md §3.4):
-                  sin lógica todavía, se implementan en su propia tarea sin tocar este layout.
-                  "Guardar con nombre" ya tiene lógica real (tarea T7.1, historial). */}
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={copiarComoTexto}>
                 <Copy />
                 Copiar como texto
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={imprimir}>
                 <Printer />
                 Imprimir
               </DropdownMenuItem>
@@ -214,6 +227,7 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
         estado={resultadoSimplex.data?.estado}
       />
     </div>
+    </>
   );
 }
 
