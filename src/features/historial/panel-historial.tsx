@@ -52,7 +52,7 @@ import { useEliminarEntradaHistorial, useHistorial, useRenombrarEntradaHistorial
 import type { EntradaHistorial } from "./tipos";
 
 /** Mismo texto corto que `features/resultados/columna-modelo.tsx` (docs/06 §4). */
-const ETIQUETA_ESTADO: Record<EstadoSimplex, string> = {
+export const ETIQUETA_ESTADO: Record<EstadoSimplex, string> = {
   optimo: "Óptimo",
   optimos_alternativos: "Óptimos alternativos",
   no_acotado: "No acotado",
@@ -60,7 +60,7 @@ const ETIQUETA_ESTADO: Record<EstadoSimplex, string> = {
   limite_iteraciones: "Límite de iteraciones",
 };
 
-const VARIANTE_BADGE_ESTADO: Record<EstadoSimplex, "default" | "secondary" | "destructive"> = {
+export const VARIANTE_BADGE_ESTADO: Record<EstadoSimplex, "default" | "secondary" | "destructive"> = {
   optimo: "default",
   optimos_alternativos: "default",
   no_acotado: "secondary",
