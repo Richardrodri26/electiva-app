@@ -67,7 +67,7 @@ test.describe("Asistente completo", () => {
 
     const panel = page.getByRole("tabpanel");
     await expect(panel.getByRole("heading", { name: "Qué conviene hacer" })).toBeVisible();
-    await expect(panel.getByRole("heading", { name: "Cómo quedan tus recursos" })).toBeVisible();
+    await expect(panel.getByRole("heading", { name: "Cómo quedan sus recursos" })).toBeVisible();
     await expect(panel.getByRole("heading", { name: "Resultado" })).toBeVisible();
 
     // Variables en futuro, sin la unidad "Unidades".
@@ -78,5 +78,38 @@ test.describe("Asistente completo", () => {
     await expect(panel.getByText("Se usa todo lo disponible de «Horas».")).toBeVisible();
     // Objetivo con la meta elegida.
     await expect(panel.getByText("Mayor utilidad: Z = 26")).toBeVisible();
+  });
+
+  test("Cancelar en el paso 5 borra el borrador y vuelve al inicio", async ({ page }) => {
+    await page.goto("/modelo/asistente");
+
+    await page.getByRole("radio", { name: "Productos" }).click();
+    await page.getByLabel("¿Cómo desea llamar a la opción 1?").fill("Mesas");
+    await page.getByLabel("¿Cómo desea llamar a la opción 2?").fill("Sillas");
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    await expect(page).toHaveURL(/paso=2/);
+    await page.getByRole("radio", { name: "Mayor utilidad" }).click();
+    await page.getByLabel("¿Cuánto aporta o cuesta cada Mesas?").fill("4");
+    await page.getByLabel("¿Cuánto aporta o cuesta cada Sillas?").fill("3");
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    await expect(page).toHaveURL(/paso=3/);
+    await page.getByLabel('¿Cuánto utiliza o aporta cada Mesas en "Presupuesto"?').fill("2");
+    await page.getByLabel('¿Cuánto utiliza o aporta cada Sillas en "Presupuesto"?').fill("1");
+    await page
+      .getByLabel('¿Cuál es la cantidad disponible, requerida o exacta para "Presupuesto"?')
+      .fill("12");
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    await expect(page).toHaveURL(/paso=4/);
+    await page.getByRole("radio", { name: "Deben ser unidades completas (enteras)" }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    await expect(page).toHaveURL(/paso=5/);
+    await page.getByRole("button", { name: "Cancelar" }).click();
+    await page.getByRole("button", { name: "Sí, cancelar" }).click();
+
+    await expect(page).toHaveURL("/");
   });
 });

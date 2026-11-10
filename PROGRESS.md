@@ -48,12 +48,10 @@
 
 ## Qué falta
 
-| Tarea | Depende de | Qué es |
-|---|---|---|
-| (decisión pendiente) | — | "Cancelar" en el asistente solo vuelve al paso 1; `docs/06` dice "vuelve al inicio". |
+Nada pendiente.
 
-### Orden sugerido
-Solo queda la decisión pendiente de "Cancelar" en el asistente; no queda otra tarea del plan de docs/07.
+### Estado
+No quedan tareas pendientes del plan de docs/07 ni decisiones abiertas. "Cancelar" en el asistente borra el borrador y navega a `/`.
 
 ## Decisiones de arquitectura ya confirmadas con el usuario (no las vuelvas a preguntar)
 

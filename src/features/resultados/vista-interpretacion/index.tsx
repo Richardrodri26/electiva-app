@@ -41,7 +41,7 @@ export function VistaInterpretacion({ modelo, formato }: VistaInterpretacionProp
     return (
       <EstadoVacio
         titulo="No se pudo calcular la interpretación"
-        descripcion="Vuelve a cargar la página o revisa el modelo en la pestaña Modelo."
+        descripcion="Vuelva a cargar la página o revise el modelo en la pestaña Modelo."
       />
     );
   }
@@ -52,7 +52,7 @@ export function VistaInterpretacion({ modelo, formato }: VistaInterpretacionProp
     return (
       <EstadoVacio
         titulo="No hay solución que interpretar"
-        descripcion="Este modelo no tiene una solución final, así que no hay frases de interpretación. Revisa la pestaña Simplex para ver por qué."
+        descripcion="Este modelo no tiene una solución final, así que no hay frases de interpretación. Revise la pestaña Simplex para ver por qué."
       />
     );
   }
@@ -84,7 +84,7 @@ function ContenidoInterpretacion({ interpretacion, resultado }: ContenidoInterpr
         <Frases frases={interpretacion.variables} />
       </Seccion>
 
-      <Seccion titulo="Cómo quedan tus recursos">
+      <Seccion titulo="Cómo quedan sus recursos">
         <Frases frases={interpretacion.restricciones} />
       </Seccion>
 

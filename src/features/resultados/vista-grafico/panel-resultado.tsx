@@ -47,7 +47,7 @@ export function PanelResultado({ resultado, formato }: PanelResultadoProps) {
         <Alert>
           <TrendingUp aria-hidden="true" />
           <AlertTitle>Z puede crecer sin límite</AlertTitle>
-          <AlertDescription>Falta alguna limitación: revisa tus restricciones.</AlertDescription>
+          <AlertDescription>Falta alguna limitación: revise sus restricciones.</AlertDescription>
         </Alert>
       ) : null}
 
@@ -55,7 +55,7 @@ export function PanelResultado({ resultado, formato }: PanelResultadoProps) {
         <Alert variant="destructive">
           <XCircle aria-hidden="true" />
           <AlertTitle>No hay ningún punto que cumpla todo a la vez</AlertTitle>
-          <AlertDescription>Revisa los límites de tus restricciones.</AlertDescription>
+          <AlertDescription>Revise los límites de sus restricciones.</AlertDescription>
         </Alert>
       ) : null}
 

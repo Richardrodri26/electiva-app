@@ -213,7 +213,7 @@ Ver `05-metodo-grafico.md` §4. Gráfica a la izquierda (≈ 60 %), tabla de vé
 
 #### Pestaña Interpretación
 
-Lista de frases de `interpretar.ts` agrupadas en "Qué conviene hacer", "Cómo quedan tus recursos" y
+Lista de frases de `interpretar.ts` agrupadas en "Qué conviene hacer", "Cómo quedan sus recursos" y
 "Resultado". Avisos (`no_entera`, etc.) como `Alert`.
 
 ## 4. Estados y mensajes
@@ -222,8 +222,8 @@ Lista de frases de `interpretar.ts` agrupadas en "Qué conviene hacer", "Cómo q
 |-----------|--------------|
 | Óptimo único | `Alert` verde: "Solución óptima: Z = 57/2 con x₁ = 31/4 y x₂ = 21/8." |
 | Óptimos alternativos | `Alert` azul: "Hay más de una solución óptima con Z = 16." + ver alternativa |
-| No acotado | `Alert` ámbar: "Z puede crecer sin límite: falta alguna limitación. Revisa tus restricciones." |
-| Infactible | `Alert` rojo: "Ningún punto cumple todas las restricciones a la vez. Revisa los límites de R1 y R2." (nombrar las que tenían artificiales > 0) |
+| No acotado | `Alert` ámbar: "Z puede crecer sin límite: falta alguna limitación. Revise sus restricciones." |
+| Infactible | `Alert` rojo: "Ningún punto cumple todas las restricciones a la vez. Revise los límites de R1 y R2." (nombrar las que tenían artificiales > 0) |
 | Límite de iteraciones | `Alert` rojo con explicación de posible ciclo |
 | URL inválida | Página `ErrorAmable`: "Este enlace no contiene un modelo válido." [Abrir editor] [Ir al inicio] |
 | Cargando | `Skeleton` con la forma de la tabla (casi nunca visible) |

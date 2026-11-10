@@ -13,7 +13,7 @@ import { PaginaResolver } from "@/features/resultados/pagina-resolver";
 export const metadata: Metadata = {
   title: "Resultados — Programación lineal",
   description:
-    "Resolvé tu modelo de programación lineal por el método gráfico o por Simplex, viendo cada paso como en clase.",
+    "Resuelva su modelo de programación lineal por el método gráfico o por Simplex, viendo cada paso como en clase.",
 };
 
 export default function ResolverPage() {

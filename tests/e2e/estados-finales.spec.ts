@@ -21,7 +21,7 @@ test.describe("Estados finales sin solución", () => {
     const alerta = panel.getByRole("alert").filter({ hasText: "Infactible" });
     await expect(alerta).toBeVisible();
     await expect(alerta).toContainText(
-      "Ningún punto cumple todas las restricciones a la vez. Revisa los límites de Restricción 2.",
+      "Ningún punto cumple todas las restricciones a la vez. Revise los límites de Restricción 2.",
     );
     await expect(panel.getByText("Infactible", { exact: true }).first()).toBeVisible();
   });
@@ -33,7 +33,7 @@ test.describe("Estados finales sin solución", () => {
       hasText: "No hay ningún punto que cumpla todo a la vez",
     });
     await expect(alerta).toBeVisible();
-    await expect(alerta).toContainText("Revisa los límites de tus restricciones.");
+    await expect(alerta).toContainText("Revise los límites de sus restricciones.");
   });
 
   test("C7 infactible: la interpretación avisa que no hay solución", async ({ page }) => {
@@ -50,7 +50,7 @@ test.describe("Estados finales sin solución", () => {
     const panel = page.getByRole("tabpanel");
     const alerta = panel.getByRole("alert").filter({ hasText: "No acotado" });
     await expect(alerta).toBeVisible();
-    await expect(alerta).toContainText("Z puede crecer sin límite: falta alguna limitación. Revisa tus restricciones.");
+    await expect(alerta).toContainText("Z puede crecer sin límite: falta alguna limitación. Revise sus restricciones.");
   });
 
   test("C8 no acotado: el método gráfico avisa que Z puede crecer sin límite", async ({ page }) => {
@@ -58,7 +58,7 @@ test.describe("Estados finales sin solución", () => {
 
     const alerta = page.getByRole("tabpanel").getByRole("alert").filter({ hasText: "Z puede crecer sin límite" });
     await expect(alerta).toBeVisible();
-    await expect(alerta).toContainText("Falta alguna limitación: revisa tus restricciones.");
+    await expect(alerta).toContainText("Falta alguna limitación: revise sus restricciones.");
   });
 
   test("C8 no acotado: la interpretación avisa que no hay solución", async ({ page }) => {

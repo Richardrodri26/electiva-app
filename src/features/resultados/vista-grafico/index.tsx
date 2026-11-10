@@ -74,7 +74,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
     return (
       <EstadoVacio
         titulo="No se pudo calcular la gráfica"
-        descripcion="Vuelve a cargar la página o revisa el modelo en la pestaña Modelo."
+        descripcion="Vuelva a cargar la página o revise el modelo en la pestaña Modelo."
       />
     );
   }

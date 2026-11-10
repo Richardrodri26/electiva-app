@@ -135,7 +135,7 @@ export function EstadoFinal({ modelo, resultado, formato, mostrandoAlternativa, 
         <Alert className="border-amber-500/50">
           <AlertTitle className="text-amber-600 dark:text-amber-400">No acotado</AlertTitle>
           <AlertDescription className="text-foreground">
-            Z puede crecer sin límite: falta alguna limitación. Revisa tus restricciones.
+            Z puede crecer sin límite: falta alguna limitación. Revise sus restricciones.
           </AlertDescription>
         </Alert>
       ) : null}
@@ -147,7 +147,7 @@ export function EstadoFinal({ modelo, resultado, formato, mostrandoAlternativa, 
             Ningún punto cumple todas las restricciones a la vez.{" "}
             {(() => {
               const nombres = nombresRestriccionesInfactibles(modelo, resultado);
-              return nombres.length > 0 ? `Revisa los límites de ${unirConY(nombres)}.` : "Revisa tus restricciones.";
+              return nombres.length > 0 ? `Revise los límites de ${unirConY(nombres)}.` : "Revise sus restricciones.";
             })()}
           </AlertDescription>
         </Alert>

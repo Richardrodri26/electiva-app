@@ -169,7 +169,7 @@ esas columnas (si tiene razón válida; si no, solo se informa el estado).
 
 | Código | Cuándo | Texto (UI) |
 |--------|--------|------------|
-| `no_entera` | `naturaleza = 'entera'` y algún `xⱼ` no es entero | "La solución tiene valores con decimales, pero pediste cantidades enteras. Esta es la solución del modelo sin la condición de enteros; revisa el método gráfico para ver el mejor punto entero (solo con 2 variables)." |
+| `no_entera` | `naturaleza = 'entera'` y algún `xⱼ` no es entero | "La solución tiene valores con decimales, pero pidió cantidades enteras. Esta es la solución del modelo sin la condición de enteros; revise el método gráfico para ver el mejor punto entero (solo con 2 variables)." |
 | `degenerada` | alguna básica con valor 0 en la solución | "Solución degenerada: una variable básica vale 0." |
 | `empate` | hubo `empateEntrada` o `empateSalida` | "Hubo un empate; se eligió la primera opción (más a la izquierda / más arriba)." |
 | `objetivo_cero` | todos los cⱼ = 0 | ver `03` §3.3 |

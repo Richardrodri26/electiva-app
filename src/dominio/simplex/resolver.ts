@@ -26,7 +26,7 @@ const MAX_ITERACIONES_DEFECTO = 50;
 
 const TEXTO_AVISO: Record<string, string> = {
   no_entera:
-    "La solución tiene valores con decimales, pero pediste cantidades enteras. Esta es la solución del modelo sin la condición de enteros; revisa el método gráfico para ver el mejor punto entero (solo con 2 variables).",
+    "La solución tiene valores con decimales, pero pidió cantidades enteras. Esta es la solución del modelo sin la condición de enteros; revise el método gráfico para ver el mejor punto entero (solo con 2 variables).",
   degenerada: "Solución degenerada: una variable básica vale 0.",
   empate: "Hubo un empate; se eligió la primera opción (más a la izquierda / más arriba).",
   objetivo_cero: "Todas las opciones aportan 0: cualquier punto factible es óptimo.",
