@@ -39,6 +39,10 @@ yarn-error.log*
 # herramientas de verificación de agentes (logs/snapshots temporales)
 .playwright-mcp/
 
+# Playwright (reportes y artefactos de pruebas e2e)
+playwright-report/
+test-results/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
