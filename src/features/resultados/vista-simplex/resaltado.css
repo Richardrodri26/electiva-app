@@ -1,0 +1,50 @@
+/**
+ * Animación del resaltador de la tabla Simplex (docs/06-ux-ui.md §1.3): al cambiar de
+ * iteración, el resaltador "barre" primero la columna pivote y luego la fila pivote
+ * (~400ms en total). `prefers-reduced-motion` desactiva la animación y deja el resultado
+ * final (el resaltado estático) puesto de una vez.
+ *
+ * `tabla-simplex.tsx` le pone `key={...}` a la tabla al renderizarla (en `index.tsx`), para
+ * que la animación se reinicie en cada cambio de iteración (un cambio de props por sí solo
+ * no reinicia una animación CSS).
+ *
+ * CSS global (NO `.module.css`): en este proyecto (Next.js 16 + Turbopack + Tailwind v4)
+ * `import estilos from "./x.module.css"` resuelve el export por default como `{}` en
+ * tiempo de ejecución (el stylesheet se inyecta, pero el mapa de nombres de clase queda
+ * vacío) — comprobado en vivo con `pnpm dev`. Por eso se usan nombres de clase literales,
+ * con el prefijo `vsx-` (vista-simplex) para no chocar con el resto de la app.
+ */
+
+.vsx-columna-pivote {
+  animation: vsx-barrido-columna 200ms ease-out both;
+}
+
+.vsx-fila-pivote {
+  animation: vsx-barrido-fila 200ms ease-out 200ms both;
+}
+
+@keyframes vsx-barrido-columna {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--resaltador);
+  }
+}
+
+@keyframes vsx-barrido-fila {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--resaltador);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vsx-columna-pivote,
+  .vsx-fila-pivote {
+    animation: none;
+    background-color: var(--resaltador);
+  }
+}
