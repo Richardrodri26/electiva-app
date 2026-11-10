@@ -58,7 +58,7 @@ export function EtiquetaVariable({
         render={
           <button
             type="button"
-            className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 font-serif italic hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-md px-1.5 py-1 font-serif italic hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             aria-label={`Editar el nombre de x${numero} (actualmente "${etiqueta || `x${numero}`}")`}
           >
             <span className="truncate">{etiqueta || `x${numero}`}</span>

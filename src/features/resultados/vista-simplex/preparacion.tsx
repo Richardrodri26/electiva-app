@@ -51,7 +51,7 @@ export function Preparacion({ pasos, nombresVariables, formato }: PreparacionPro
 
   return (
     <Collapsible className="rounded-lg border border-border">
-      <CollapsibleTrigger className="group flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-semibold">
+      <CollapsibleTrigger className="group flex min-h-11 w-full items-center gap-2 px-3 py-2 text-left text-sm font-semibold">
         <ChevronRight aria-hidden="true" className="size-4 transition-transform group-data-[panel-open]:rotate-90" />
         Preparación
         <span className="font-normal text-muted-foreground">

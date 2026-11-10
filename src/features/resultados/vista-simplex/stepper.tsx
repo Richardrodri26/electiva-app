@@ -43,7 +43,7 @@ export function Stepper({ iter, total, onCambiarIter, finalResuelto = false }: S
               aria-current={esActual ? "step" : undefined}
               onClick={() => irA(n)}
               className={cn(
-                "flex size-8 items-center justify-center rounded-full border text-sm font-medium transition-colors",
+                "flex size-11 items-center justify-center rounded-full border text-sm font-medium transition-colors",
                 esActual
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-foreground hover:bg-muted",

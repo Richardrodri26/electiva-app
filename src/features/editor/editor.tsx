@@ -204,10 +204,10 @@ export function Editor({ onResolver, className }: EditorProps) {
                 aria-label="Sentido del objetivo"
                 className="flex w-auto flex-row gap-4"
               >
-                <Label className="flex items-center gap-1.5">
+                <Label className="flex min-h-11 items-center gap-1.5">
                   <RadioGroupItem value="max" /> Maximizar
                 </Label>
-                <Label className="flex items-center gap-1.5">
+                <Label className="flex min-h-11 items-center gap-1.5">
                   <RadioGroupItem value="min" /> Minimizar
                 </Label>
               </RadioGroup>
@@ -474,7 +474,7 @@ export function Editor({ onResolver, className }: EditorProps) {
                     <span className="text-sm text-muted-foreground">
                       {textoCondiciones(cantidadVariables, campo.state.value === "entera")}
                     </span>
-                    <Label className="flex items-center gap-2">
+                    <Label className="flex min-h-11 items-center gap-2">
                       <Checkbox
                         checked={campo.state.value === "entera"}
                         onCheckedChange={(valor) => campo.handleChange(valor === true ? "entera" : "fraccionaria")}

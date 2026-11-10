@@ -152,7 +152,7 @@ export function TablaVertices({ vertices, modelo, formato, verticeResaltado, onR
                   {ordenable ? (
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1 hover:text-foreground"
+                      className="inline-flex min-h-11 min-w-11 items-center gap-1 hover:text-foreground"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}

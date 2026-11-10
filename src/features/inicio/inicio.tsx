@@ -165,7 +165,7 @@ export function Inicio() {
                 <div className="flex min-w-0 flex-col gap-1">
                   <Link
                     href={`/resolver?m=${serializarModelo(entrada.modelo)}`}
-                    className="min-w-0 truncate rounded-sm text-base font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="block min-w-0 truncate rounded-sm py-2.5 text-base font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     {entrada.titulo}
                   </Link>
