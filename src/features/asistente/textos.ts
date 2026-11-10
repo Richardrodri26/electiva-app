@@ -101,7 +101,7 @@ export const OPCION_CORREGIR_TODO = "Todo desde el inicio";
  * aporte de cada una y los datos de las limitaciones (decisión #2 confirmada para T5.2).
  */
 export const AVISO_CORREGIR_OPCIONES =
-  "Como vas a cambiar las opciones que se comparan, también vas a tener que volver a indicar cuánto aporta cada una y los datos de las limitaciones.";
+  "Como va a cambiar las opciones que se comparan, también va a tener que volver a indicar cuánto aporta cada una y los datos de las limitaciones.";
 
 export const TITULO_DIALOGO_CANCELAR = "¿Cancelar y borrar lo registrado?";
 export const DESCRIPCION_DIALOGO_CANCELAR =

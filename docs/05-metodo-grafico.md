@@ -1,7 +1,7 @@
 # 05 · Método gráfico
 
 Disponible **solo con 2 variables**. Con otra cantidad, la pestaña aparece deshabilitada con el tooltip:
-*"El método gráfico solo aplica a modelos con 2 variables. Usa el Simplex."*
+*"El método gráfico solo aplica a modelos con 2 variables. Use el Simplex."*
 
 Archivos: `dominio/grafico/{tipos,resolver}.ts` (puro, `Fraccion`) y `features/resultados/vista-grafico/`.
 

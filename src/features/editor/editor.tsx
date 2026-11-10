@@ -504,7 +504,7 @@ export function Editor({ onResolver, className }: EditorProps) {
                       {tokensObjetivo !== null ? (
                         <Expresion tokens={tokensObjetivo} />
                       ) : (
-                        <span className="text-muted-foreground">Completá los números para ver la vista previa.</span>
+                        <span className="text-muted-foreground">Complete los números para ver la vista previa.</span>
                       )}
                     </div>
                     {valores.restricciones.map((restriccion, indice) => {

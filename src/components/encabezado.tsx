@@ -64,7 +64,7 @@ export function Encabezado() {
                 </Button>
               }
             />
-            <TooltipContent>Mirá los modelos que resolviste antes</TooltipContent>
+            <TooltipContent>Vea los modelos que resolvió antes</TooltipContent>
           </Tooltip>
           <PanelHistorial open={historialAbierto} onOpenChange={setHistorialAbierto} />
 

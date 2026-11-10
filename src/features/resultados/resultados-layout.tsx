@@ -53,7 +53,7 @@ import { VistaSimplex } from "./vista-simplex";
 
 /** docs/05-metodo-grafico.md §0: texto exacto del tooltip cuando la pestaña está deshabilitada. */
 const TEXTO_GRAFICO_DESHABILITADO =
-  "El método gráfico solo aplica a modelos con 2 variables. Usa el Simplex.";
+  "El método gráfico solo aplica a modelos con 2 variables. Use el Simplex.";
 
 export interface ResultadosLayoutProps {
   modelo: ModeloLineal;

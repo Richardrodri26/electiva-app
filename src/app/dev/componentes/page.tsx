@@ -132,8 +132,8 @@ export default function ComponentesPage() {
         </CardHeader>
         <CardContent>
           <EstadoVacio
-            titulo="Todavía no resolviste ningún problema"
-            descripcion="Cuando resuelvas uno, vas a poder encontrarlo acá para volver a verlo."
+            titulo="Todavía no resolvió ningún problema"
+            descripcion="Cuando resuelva uno, podrá encontrarlo aquí para volver a verlo."
             accion={<Button size="sm" nativeButton={false} render={<Link href="/">Empezar con preguntas</Link>} />}
           />
         </CardContent>

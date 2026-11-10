@@ -44,21 +44,20 @@
 | Rutas | Inicio (`/`), `/modelo/asistente` y `/modelo/editor` reales (las `/dev/*` quedan como páginas de revisión) | ✅ |
 | T8.2 | E2E Playwright en `tests/e2e/` (los 5 escenarios de docs/07) | ✅ |
 | T8.3 | README en español | ✅ |
+| T8.1 | Accesibilidad y responsive: Lighthouse 100/100 en las pantallas auditadas, táctiles ≥44px, enlaces reales en vez de `role=button` | ✅ |
 
 ## Qué falta
 
 | Tarea | Depende de | Qué es |
 |---|---|---|
-| **T8.1** | Todo lo anterior | Accesibilidad y responsive: Lighthouse (≥90 en Accesibilidad y Buenas Prácticas), objetivos táctiles ≥44px, 375/768/1024/1440px. Incluye corregir los enlaces hechos con `<Button render={<Link/>}>` que se anuncian como botones (`<a role="button">`). Ver commits recientes por si ya se hizo. |
-| (decisión pendiente) | — | Tono: `docs/06` usa "tú", el proyecto pide "usted", y el editor/encabezado usan voseo ("Completá…"). Inicio usa "usted". Falta que el usuario decida si se unifica todo. |
 | (decisión pendiente) | — | "Cancelar" en el asistente solo vuelve al paso 1; `docs/06` dice "vuelve al inicio". |
 
 ### Orden sugerido
-Cerrar T8.1 y resolver las dos decisiones pendientes; no queda otra tarea del plan de docs/07.
+Solo queda la decisión pendiente de "Cancelar" en el asistente; no queda otra tarea del plan de docs/07.
 
 ## Decisiones de arquitectura ya confirmadas con el usuario (no las vuelvas a preguntar)
 
-1. Tono del asistente: **"usted"**, textos literales del CLI (`../console-program/src/io/prompt.ts` y `flow/*.ts`), nunca "tú".
+1. Tono de TODA la app: **"usted"** (nunca "tú" ni voseo). Los textos del asistente son literales del CLI (`../console-program/src/io/prompt.ts` y `flow/*.ts`). Se unificó en toda la UI, incluido el texto de docs/05 ("Use el Simplex.").
 2. Resumen del paso 5 del asistente: formato **literal del CLI** (excepción autorizada a la regla de "sin jerga").
 3. Git: repo local, sin remoto. Cada tarea es un commit.
 4. React Compiler: **activado**.

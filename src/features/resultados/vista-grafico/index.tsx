@@ -45,7 +45,7 @@ export function VistaGrafico({ modelo, formato }: VistaGraficoProps) {
     return (
       <EstadoVacio
         titulo="El método gráfico solo aplica a modelos con 2 variables"
-        descripcion="Este modelo tiene otra cantidad de variables. Usa el Simplex para resolverlo."
+        descripcion="Este modelo tiene otra cantidad de variables. Use el Simplex para resolverlo."
       />
     );
   }

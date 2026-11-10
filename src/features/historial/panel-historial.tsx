@@ -96,7 +96,7 @@ export function PanelHistorial({ open, onOpenChange }: PanelHistorialProps) {
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Historial</SheetTitle>
-          <SheetDescription>Los últimos modelos que resolviste, más reciente primero.</SheetDescription>
+          <SheetDescription>Los últimos modelos que resolvió, más reciente primero.</SheetDescription>
         </SheetHeader>
 
         <div className="flex flex-col gap-2 overflow-y-auto px-4 pb-4">
@@ -107,7 +107,7 @@ export function PanelHistorial({ open, onOpenChange }: PanelHistorialProps) {
             </>
           ) : null}
           {historial.data !== undefined && historial.data.length === 0 ? (
-            <EstadoVacio titulo="Todavía no resolviste ningún modelo" />
+            <EstadoVacio titulo="Todavía no resolvió ningún modelo" />
           ) : null}
           {historial.data?.map((entrada) => (
             <ItemHistorial

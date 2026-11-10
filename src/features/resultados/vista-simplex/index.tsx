@@ -52,7 +52,7 @@ export function VistaSimplex({ modelo, formato }: VistaSimplexProps) {
     return (
       <EstadoVacio
         titulo="No se pudo resolver el modelo"
-        descripcion="Revisá el modelo en el editor; si el problema persiste, puede ser un error de la aplicación."
+        descripcion="Revise el modelo en el editor; si el problema persiste, puede ser un error de la aplicación."
       />
     );
   }

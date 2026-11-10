@@ -10,8 +10,8 @@ export default function NoEncontrado() {
         No encontramos esta página
       </h1>
       <p className="max-w-md text-muted-foreground">
-        Puede que el enlace esté roto o que la página ya no exista. Volvé al
-        inicio y empezá de nuevo.
+        Puede que el enlace esté roto o que la página ya no exista. Vuelva al
+        inicio y empiece de nuevo.
       </p>
       <Link href="/" className={buttonVariants({ className: "h-11 px-4" })}>
         Ir al inicio
