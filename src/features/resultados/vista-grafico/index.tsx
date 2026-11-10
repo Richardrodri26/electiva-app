@@ -127,7 +127,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
                   step={nivelMaximo / 200}
                   value={[nivelZ]}
                   onValueChange={(valores) => setNivelZ(Array.isArray(valores) ? (valores[0] ?? 0) : valores)}
-                  aria-label="Mover la recta de nivel de Z"
+                  etiquetaPulgar="Mover la recta de nivel de Z"
                 />
               </div>
 

@@ -74,6 +74,7 @@
   --input: #dce3ec;
   --ring: #2457c5;
   --resaltador: #ffe066;
+  --resaltador-fondo: var(--resaltador);
   --entra: #187048;
   --sale: #c8372d;
   --cuadricula: #dce3ec;
@@ -112,6 +113,8 @@
   --input: oklch(1 0 0 / 16%);
   --ring: #8fb3ff;
   --resaltador: #e8c547;
+  /* docs/06 §1.1: en pizarra el resaltador va al 30 %; opaco no da contraste AA con la tiza. */
+  --resaltador-fondo: color-mix(in srgb, var(--resaltador) 30%, transparent);
   --entra: #5fd3a0;
   --sale: #ff8a80;
   --cuadricula: #2a3a45;

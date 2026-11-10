@@ -28,7 +28,7 @@
     background-color: transparent;
   }
   to {
-    background-color: var(--resaltador);
+    background-color: var(--resaltador-fondo);
   }
 }
 
@@ -37,7 +37,7 @@
     background-color: transparent;
   }
   to {
-    background-color: var(--resaltador);
+    background-color: var(--resaltador-fondo);
   }
 }
 
@@ -45,6 +45,6 @@
   .vsx-columna-pivote,
   .vsx-fila-pivote {
     animation: none;
-    background-color: var(--resaltador);
+    background-color: var(--resaltador-fondo);
   }
 }

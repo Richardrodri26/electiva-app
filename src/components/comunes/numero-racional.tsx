@@ -49,7 +49,7 @@ export function NumeroRacional({ valor, modo, className }: NumeroRacionalProps) 
 
   if (modo === "linea") {
     return (
-      <span className={cn("font-serif tabular-nums", className)} aria-label={etiqueta}>
+      <span className={cn("font-serif tabular-nums", className)} role="img" aria-label={etiqueta}>
         <span aria-hidden="true">
           {negativo ? MENOS_UI : ""}
           {numerador}/{denominador}
@@ -61,6 +61,7 @@ export function NumeroRacional({ valor, modo, className }: NumeroRacionalProps) 
   return (
     <span
       className={cn("inline-flex items-baseline gap-0.5 font-serif tabular-nums", className)}
+      role="img"
       aria-label={etiqueta}
     >
       {negativo ? <span aria-hidden="true">{MENOS_UI}</span> : null}
