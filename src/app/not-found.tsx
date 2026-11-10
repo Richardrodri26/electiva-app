@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function NoEncontrado() {
   return (
@@ -13,7 +13,9 @@ export default function NoEncontrado() {
         Puede que el enlace esté roto o que la página ya no exista. Volvé al
         inicio y empezá de nuevo.
       </p>
-      <Button nativeButton={false} render={<Link href="/">Ir al inicio</Link>} />
+      <Link href="/" className={buttonVariants({ className: "h-11 px-4" })}>
+        Ir al inicio
+      </Link>
     </main>
   );
 }

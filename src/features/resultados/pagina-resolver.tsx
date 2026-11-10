@@ -13,7 +13,7 @@ import Link from "next/link";
 import { useQueryState } from "nuqs";
 
 import { ErrorAmable } from "@/components/comunes/error-amable";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { CLAVE_MODELO, parseAsModelo } from "@/lib/url-state";
 import { ResultadosLayout } from "./resultados-layout";
 
@@ -26,8 +26,12 @@ export function PaginaResolver() {
         mensaje="Este enlace no contiene un modelo válido."
         accion={
           <div className="flex flex-wrap gap-2">
-            <Button nativeButton={false} render={<Link href="/modelo/editor">Abrir editor</Link>} />
-            <Button variant="outline" nativeButton={false} render={<Link href="/">Ir al inicio</Link>} />
+            <Link href="/modelo/editor" className={buttonVariants({ className: "h-11 px-4" })}>
+              Abrir editor
+            </Link>
+            <Link href="/" className={buttonVariants({ variant: "outline", className: "h-11 px-4" })}>
+              Ir al inicio
+            </Link>
           </div>
         }
       />

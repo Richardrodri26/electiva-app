@@ -24,8 +24,8 @@ test.describe("Enlace corrupto en /resolver", () => {
       const error = page.getByRole("alert").filter({ hasText: MENSAJE });
       await expect(error).toBeVisible();
       await expect(error.getByText("Algo no salió como esperábamos")).toBeVisible();
-      await expect(error.getByRole("button", { name: "Abrir editor" })).toHaveAttribute("href", "/modelo/editor");
-      await expect(error.getByRole("button", { name: "Ir al inicio" })).toHaveAttribute("href", "/");
+      await expect(error.getByRole("link", { name: "Abrir editor" })).toHaveAttribute("href", "/modelo/editor");
+      await expect(error.getByRole("link", { name: "Ir al inicio" })).toHaveAttribute("href", "/");
 
       // No se renderiza la pantalla de resultados.
       await expect(page.getByRole("tab", { name: "Simplex" })).toHaveCount(0);
@@ -34,13 +34,13 @@ test.describe("Enlace corrupto en /resolver", () => {
 
   test("'Abrir editor' lleva al editor", async ({ page }) => {
     await page.goto("/resolver?m=basura");
-    await page.getByRole("button", { name: "Abrir editor" }).click();
+    await page.getByRole("link", { name: "Abrir editor" }).click();
     await expect(page).toHaveURL(/\/modelo\/editor$/);
   });
 
   test("'Ir al inicio' lleva a la pantalla de inicio", async ({ page }) => {
     await page.goto("/resolver");
-    await page.getByRole("button", { name: "Ir al inicio" }).click();
+    await page.getByRole("link", { name: "Ir al inicio" }).click();
     await expect(page).toHaveURL(/\/$/);
   });
 });

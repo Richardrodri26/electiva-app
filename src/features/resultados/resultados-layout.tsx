@@ -17,7 +17,7 @@ import { useQueryState } from "nuqs";
 import { Copy, Link2, Printer, Save } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,7 +121,9 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
     <div className="flex flex-col gap-4 print:hidden">
       <header className="flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="ghost" size="sm" nativeButton={false} render={<Link href={hrefEditor}>← Editar</Link>} />
+          <Link href={hrefEditor} className={buttonVariants({ variant: "ghost", className: "h-11 px-3" })}>
+            <span aria-hidden="true">←</span> Editar
+          </Link>
           <p className="text-base font-semibold">
             <Expresion
               tokens={[
