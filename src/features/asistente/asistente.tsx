@@ -133,6 +133,8 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
 
   function avanzarA(siguiente: NumeroPasoAsistente): void {
     haIniciadoRef.current = true;
+    // El borrador que se autoguarda desde ahora es el de esta sesión: no ofrecer "continuar" sobre él.
+    setBannerDescartado(true);
     setPasoMaximoAlcanzado((actual) => (siguiente > actual ? siguiente : actual));
     irAPaso(siguiente);
   }
