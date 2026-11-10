@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# herramientas de verificación de agentes (logs/snapshots temporales)
+.playwright-mcp/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
