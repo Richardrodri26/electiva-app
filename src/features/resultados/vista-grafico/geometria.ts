@@ -118,11 +118,36 @@ export function calcularSegmentoLinea(
     const x1 = b / a1;
     return { desde: { x1, x2: dominioX2[0] }, hasta: { x1, x2: dominioX2[1] } };
   }
+  // Recorte al rectángulo del dominio: se intersecta la recta con sus 4 bordes y se conservan
+  // los puntos que caen dentro (así una recta con pendiente no se sale por arriba/abajo).
+  const [min1, max1] = dominioX1;
+  const [min2, max2] = dominioX2;
+  const tolerancia = 1e-9 * Math.max(1, Math.abs(max1), Math.abs(max2));
+  const candidatos: PuntoNumerico[] = [];
   const x2En = (x1: number): number => (b - a1 * x1) / a2;
-  return {
-    desde: { x1: dominioX1[0], x2: x2En(dominioX1[0]) },
-    hasta: { x1: dominioX1[1], x2: x2En(dominioX1[1]) },
-  };
+  for (const x1 of [min1, max1]) {
+    candidatos.push({ x1, x2: x2En(x1) });
+  }
+  if (a1 !== 0) {
+    for (const x2 of [min2, max2]) {
+      candidatos.push({ x1: (b - a2 * x2) / a1, x2 });
+    }
+  }
+  const dentro = candidatos
+    .filter(
+      (p) =>
+        p.x1 >= min1 - tolerancia &&
+        p.x1 <= max1 + tolerancia &&
+        p.x2 >= min2 - tolerancia &&
+        p.x2 <= max2 + tolerancia,
+    )
+    .sort((p, q) => p.x1 - q.x1 || p.x2 - q.x2);
+  const primero = dentro[0];
+  const ultimo = dentro[dentro.length - 1];
+  if (primero === undefined || ultimo === undefined) {
+    return null;
+  }
+  return { desde: primero, hasta: ultimo };
 }
 
 /**

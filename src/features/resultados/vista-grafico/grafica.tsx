@@ -187,14 +187,15 @@ export function Grafica({
       );
       marks.push(
         decorative(
-          text([{ ...segmento.hasta, etiqueta: `R${recta.restriccion}` }], {
+          text([{ ...puntoMedio(segmento), etiqueta: `R${recta.restriccion}` }], {
             x: "x1",
             y: "x2",
             text: "etiqueta",
             fill: colorRecta(recta.restriccion),
             fontSize: 11,
             fontWeight: 600,
-            dy: -6,
+            dy: -8,
+            dx: 10,
           }),
         ),
       );

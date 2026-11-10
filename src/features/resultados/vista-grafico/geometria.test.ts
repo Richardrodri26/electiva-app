@@ -86,6 +86,33 @@ describe("calcularSegmentoLinea", () => {
     });
   });
 
+  it("recorta también por x2: la recta no baja del dominio visible", () => {
+    // x1 + 2x2 = 10 en [0, 12] x [0, 12]: sale del dominio en (10, 0).
+    const segmento = calcularSegmentoLinea(1, 2, 10, [0, 12], [0, 12]);
+    expect(segmento).toEqual({
+      desde: { x1: 0, x2: 5 },
+      hasta: { x1: 10, x2: 0 },
+    });
+  });
+
+  it("una recta horizontal (a1 = 0) se recorta a los bordes de x1", () => {
+    const segmento = calcularSegmentoLinea(0, 2, 6, [0, 10], [0, 10]);
+    expect(segmento).toEqual({
+      desde: { x1: 0, x2: 3 },
+      hasta: { x1: 10, x2: 3 },
+    });
+  });
+
+  it("una recta que solo toca el origen (nivel Z = 0) queda como punto", () => {
+    const segmento = calcularSegmentoLinea(3, 5, 0, [0, 12], [0, 12]);
+    expect(segmento?.desde).toEqual({ x1: 0, x2: 0 });
+    expect(segmento?.hasta).toEqual({ x1: 0, x2: 0 });
+  });
+
+  it("devuelve null si la recta no cruza el dominio", () => {
+    expect(calcularSegmentoLinea(1, 1, -5, [0, 10], [0, 10])).toBeNull();
+  });
+
   it("devuelve null para una recta degenerada (a1 = a2 = 0)", () => {
     expect(calcularSegmentoLinea(0, 0, 5, [0, 10], [0, 10])).toBeNull();
   });
