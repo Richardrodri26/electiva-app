@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { History, Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
@@ -16,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PanelHistorial } from "@/features/historial/panel-historial";
 
 interface OpcionTema {
   valor: "light" | "dark" | "system";
@@ -30,12 +32,12 @@ const OPCIONES_TEMA: OpcionTema[] = [
 ];
 
 /**
- * Encabezado global de la app: nombre (enlace a Inicio), botón de historial
- * (todavía sin lógica, eso llega en la fase del historial) y el selector de
- * tema claro/oscuro/sistema.
+ * Encabezado global de la app: nombre (enlace a Inicio), botón de historial (abre
+ * `<PanelHistorial>` en un `Sheet`, docs/06-ux-ui.md §2) y el selector de tema claro/oscuro/sistema.
  */
 export function Encabezado() {
   const { theme, setTheme } = useTheme();
+  const [historialAbierto, setHistorialAbierto] = useState(false);
 
   return (
     <header className="border-b border-border">
@@ -51,7 +53,12 @@ export function Encabezado() {
           <Tooltip>
             <TooltipTrigger
               render={
-                <Button variant="ghost" size="sm" className="h-11 px-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-11 px-3"
+                  onClick={() => setHistorialAbierto(true)}
+                >
                   <History />
                   Historial
                 </Button>
@@ -59,6 +66,7 @@ export function Encabezado() {
             />
             <TooltipContent>Mirá los modelos que resolviste antes</TooltipContent>
           </Tooltip>
+          <PanelHistorial open={historialAbierto} onOpenChange={setHistorialAbierto} />
 
           <DropdownMenu>
             <DropdownMenuTrigger

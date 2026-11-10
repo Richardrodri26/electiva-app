@@ -11,6 +11,7 @@
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { Copy, Link2, Printer, Save } from "lucide-react";
@@ -30,6 +31,7 @@ import { Expresion } from "@/components/comunes/expresion";
 import { generarTokensExpresion } from "@/dominio/modelo/formato";
 import { serializarModelo } from "@/dominio/modelo/serializacion";
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
+import { DialogoGuardarConNombre } from "@/features/historial/dialogo-guardar-con-nombre";
 
 import {
   CLAVE_NUM,
@@ -62,6 +64,7 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
     CLAVE_NUM,
     parseAsFormatoNumero.withDefault(FORMATO_NUMERO_DEFECTO),
   );
+  const [guardarAbierto, setGuardarAbierto] = useState(false);
 
   const resultadoSimplex = useSolucionSimplex(modelo);
   const graficoHabilitado = modelo.variables.length === 2;
@@ -139,8 +142,9 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
               }
             />
             <DropdownMenuContent align="end">
-              {/* STUBS (T6.1): sin lógica real todavía — docs/06-ux-ui.md §3.4. Cada ítem se
-                  implementa en su tarea correspondiente sin necesidad de tocar este layout. */}
+              {/* "Copiar como texto" e "Imprimir" son STUBS (T7.2, docs/06-ux-ui.md §3.4):
+                  sin lógica todavía, se implementan en su propia tarea sin tocar este layout.
+                  "Guardar con nombre" ya tiene lógica real (tarea T7.1, historial). */}
               <DropdownMenuItem>
                 <Copy />
                 Copiar como texto
@@ -149,7 +153,7 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
                 <Printer />
                 Imprimir
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setGuardarAbierto(true)}>
                 <Save />
                 Guardar con nombre
               </DropdownMenuItem>
@@ -202,6 +206,13 @@ export function ResultadosLayout({ modelo }: ResultadosLayoutProps) {
           </Tabs>
         </div>
       </div>
+
+      <DialogoGuardarConNombre
+        open={guardarAbierto}
+        onOpenChange={setGuardarAbierto}
+        modelo={modelo}
+        estado={resultadoSimplex.data?.estado}
+      />
     </div>
   );
 }
