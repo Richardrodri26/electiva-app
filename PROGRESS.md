@@ -57,7 +57,7 @@ No quedan tareas pendientes del plan de docs/07 ni decisiones abiertas. "Cancela
 
 1. Tono de TODA la app: **"usted"** (nunca "tú" ni voseo). Los textos del asistente son literales del CLI (`../console-program/src/io/prompt.ts` y `flow/*.ts`). Se unificó en toda la UI, incluido el texto de docs/05 ("Use el Simplex.").
 2. Resumen del paso 5 del asistente: formato **literal del CLI** (excepción autorizada a la regla de "sin jerga").
-3. Git: repo local, sin remoto. Cada tarea es un commit.
+3. Git: remoto `origin` en GitHub (`Richardrodri26/electiva-app`), rama `main`. Cada tarea es un commit; el push solo se hace cuando el usuario lo pide.
 4. React Compiler: **activado**.
 5. "Copiar como texto" / formato visible: el de `docs/03` §4 (omite términos en cero, signo `−` tipográfico, respeta toggle fracción/decimal) — **no** el literal del CLI.
 6. Hash del modelo (`?m=`, historial): **excluye el título**.
