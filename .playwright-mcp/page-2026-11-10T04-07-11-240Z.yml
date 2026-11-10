@@ -1,0 +1,168 @@
+- generic [active] [ref=f14e1]:
+  - banner [ref=f14e2]:
+    - generic [ref=f14e3]:
+      - link "Programación lineal" [ref=f14e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f14e5]:
+        - button "Historial" [ref=f14e6]
+        - button "Cambiar el tema de color" [ref=f14e7]
+  - main [ref=f14e8]:
+    - generic [ref=f14e9]:
+      - generic [ref=f14e10]:
+        - generic [ref=f14e11]:
+          - button "← Editar" [ref=f14e12] [cursor=pointer]
+          - paragraph [ref=f14e13]:
+            - generic [ref=f14e14]:
+              - text: max Z = 2
+              - generic [ref=f14e15]:
+                - text: x
+                - subscript [ref=f14e16]: "1"
+              - text: + 4
+              - generic [ref=f14e17]:
+                - text: x
+                - subscript [ref=f14e18]: "2"
+        - generic [ref=f14e19]:
+          - group "Formato de los números" [ref=f14e20]:
+            - button "Fracción" [pressed] [ref=f14e21]
+            - button "Decimal" [ref=f14e22]
+          - button "Copiar enlace" [ref=f14e23]
+          - button "Más acciones" [ref=f14e24]: ⋯
+      - generic [ref=f14e25]:
+        - complementary "Modelo" [ref=f14e26]:
+          - generic [ref=f14e28]:
+            - generic [ref=f14e29]: Modelo
+            - generic [ref=f14e31]:
+              - paragraph [ref=f14e32]:
+                - generic [ref=f14e33]: Maximizar
+                - generic [ref=f14e34]:
+                  - text: Z = 2
+                  - generic [ref=f14e35]:
+                    - text: x
+                    - subscript [ref=f14e36]: "1"
+                  - text: + 4
+                  - generic [ref=f14e37]:
+                    - text: x
+                    - subscript [ref=f14e38]: "2"
+              - generic [ref=f14e39]:
+                - paragraph [ref=f14e40]: s.a.
+                - list [ref=f14e41]:
+                  - listitem [ref=f14e42]:
+                    - generic [ref=f14e43]:
+                      - generic [ref=f14e44]:
+                        - text: x
+                        - subscript [ref=f14e45]: "1"
+                      - text: + 2
+                      - generic [ref=f14e46]:
+                        - text: x
+                        - subscript [ref=f14e47]: "2"
+                      - text: ≤ 8
+                  - listitem [ref=f14e48]:
+                    - generic [ref=f14e49]:
+                      - generic [ref=f14e50]:
+                        - text: x
+                        - subscript [ref=f14e51]: "1"
+                      - text: ≤ 6
+              - generic [ref=f14e73]:
+                - generic [ref=f14e74]: Óptimos alternativos
+                - generic [ref=f14e75]: Z = 16
+        - generic [ref=f14e54]:
+          - tablist [ref=f14e55]:
+            - tab "Modelo" [ref=f14e56]
+            - tab "Método gráfico" [ref=f14e57]
+            - tab "Simplex" [selected] [ref=f14e58]
+            - tab "Interpretación" [ref=f14e59]
+          - tabpanel "Simplex" [ref=f14e76]:
+            - generic [ref=f14e77]:
+              - button "Preparación 1 Normalizar · 2 Forma estándar · 3 Forma canónica · 4 Ajuste de M" [ref=f14e79]:
+                - text: Preparación
+                - generic [ref=f14e82]: 1 Normalizar · 2 Forma estándar · 3 Forma canónica · 4 Ajuste de M
+              - group "Tablas del Simplex, navegables con las flechas del teclado" [ref=f14e83]:
+                - generic [ref=f14e84]:
+                  - navigation "Iteraciones del Simplex" [ref=f14e85]:
+                    - button "0 ir a esta tabla" [ref=f14e86]:
+                      - text: "0"
+                      - generic [ref=f14e87]: ir a esta tabla
+                    - button "1 ir a esta tabla" [ref=f14e88]:
+                      - text: "1"
+                      - generic [ref=f14e89]: ir a esta tabla
+                    - button "tabla actual, resuelta" [ref=f14e90]
+                  - generic [ref=f14e94]:
+                    - button "Anterior" [ref=f14e95]
+                    - button "Siguiente" [disabled]
+                - table "Tabla 3 de 3, iteración 2 · Solución alternativa" [ref=f14e99]:
+                  - caption [ref=f14e100]: Tabla 3 de 3, iteración 2 · Solución alternativa
+                  - rowgroup [ref=f14e101]:
+                    - row [ref=f14e102]:
+                      - columnheader "Base" [ref=f14e103]
+                      - columnheader "x1" [ref=f14e104]:
+                        - generic [ref=f14e107]:
+                          - text: x
+                          - subscript [ref=f14e108]: "1"
+                      - columnheader "x2" [ref=f14e109]:
+                        - generic [ref=f14e112]:
+                          - text: x
+                          - subscript [ref=f14e113]: "2"
+                      - columnheader "S1" [ref=f14e114]:
+                        - generic [ref=f14e117]:
+                          - text: S
+                          - subscript [ref=f14e118]: "1"
+                      - columnheader "S2" [ref=f14e119]:
+                        - generic [ref=f14e122]:
+                          - text: S
+                          - subscript [ref=f14e123]: "2"
+                      - columnheader "R" [ref=f14e124]
+                  - rowgroup [ref=f14e125]:
+                    - row [ref=f14e126]:
+                      - rowheader "x2" [ref=f14e127]:
+                        - generic [ref=f14e130]:
+                          - text: x
+                          - subscript [ref=f14e131]: "2"
+                      - cell "0" [ref=f14e132]
+                      - cell "1" [ref=f14e134]
+                      - cell [ref=f14e136]:
+                        - generic "1/2" [ref=f14e138]:
+                          - generic [aria-hidden] [ref=f14e139]:
+                            - generic [ref=f14e140]: "1"
+                            - generic [ref=f14e141]: "2"
+                      - cell [ref=f14e142]:
+                        - generic "-1/2" [ref=f14e144]:
+                          - generic [aria-hidden] [ref=f14e145]: −
+                          - generic [aria-hidden] [ref=f14e146]:
+                            - generic [ref=f14e147]: "1"
+                            - generic [ref=f14e148]: "2"
+                      - cell "1" [ref=f14e149]
+                    - row [ref=f14e151]:
+                      - rowheader "x1" [ref=f14e152]:
+                        - generic [ref=f14e155]:
+                          - text: x
+                          - subscript [ref=f14e156]: "1"
+                      - cell "1" [ref=f14e157]
+                      - cell "0" [ref=f14e159]
+                      - cell "0" [ref=f14e161]
+                      - cell "1" [ref=f14e163]
+                      - cell "6" [ref=f14e165]
+                    - row [ref=f14e167]:
+                      - rowheader "Z" [ref=f14e168]
+                      - cell "0" [ref=f14e169]
+                      - cell "0" [ref=f14e171]
+                      - cell "2" [ref=f14e173]
+                      - cell "0" [ref=f14e175]
+                      - cell "16" [ref=f14e177]
+                - paragraph [ref=f14e179]: "La columna x1 tiene costo reducido 0 en la tabla óptima: pivotear sobre ella lleva a otro vértice con el mismo Z · Sale S2 (razón menor 6) · Pivote 1."
+                - alert [ref=f14e180]:
+                  - generic [ref=f14e181]: Solución alternativa
+                  - generic [ref=f14e182]:
+                    - text: Z = 16 con
+                    - generic [ref=f14e183]:
+                      - generic [ref=f14e184]:
+                        - text: x
+                        - subscript [ref=f14e185]: "1"
+                      - text: = 6 y
+                      - generic [ref=f14e186]:
+                        - text: x
+                        - subscript [ref=f14e187]: "2"
+                      - text: = 1
+                    - text: .
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f14e69] [cursor=pointer]
+  - alert [ref=f14e188]

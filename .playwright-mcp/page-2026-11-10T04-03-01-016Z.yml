@@ -1,0 +1,11 @@
+- generic [active] [ref=f7e1]:
+  - banner [ref=f7e2]:
+    - generic [ref=f7e3]:
+      - link "Programación lineal" [ref=f7e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f7e5]:
+        - button "Historial" [ref=f7e6]
+        - button "Cambiar el tema de color" [ref=f7e7]
+  - main [ref=f7e8]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f7e14] [cursor=pointer]

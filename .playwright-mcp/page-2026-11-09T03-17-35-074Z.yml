@@ -1,0 +1,146 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "Programación lineal" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - button "Historial" [ref=e6]
+        - button "Cambiar el tema de color" [ref=e7]
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]:
+          - button "← Editar" [ref=e12] [cursor=pointer]
+          - paragraph [ref=e13]:
+            - generic [ref=e14]:
+              - text: max Z = 3
+              - generic [ref=e15]:
+                - text: x
+                - subscript [ref=e16]: "1"
+              - text: − 2
+              - generic [ref=e17]:
+                - text: x
+                - subscript [ref=e18]: "2"
+        - generic [ref=e19]:
+          - group "Formato de los números" [ref=e20]:
+            - button "Fracción" [pressed] [ref=e21]
+            - button "Decimal" [ref=e22]
+          - button "Copiar enlace" [ref=e23]
+          - button "Más acciones" [ref=e24]: ⋯
+      - generic [ref=e25]:
+        - complementary "Modelo" [ref=e26]:
+          - generic [ref=e28]:
+            - generic [ref=e29]: Modelo
+            - generic [ref=e31]:
+              - paragraph [ref=e32]:
+                - generic [ref=e33]: Maximizar
+                - generic [ref=e34]:
+                  - text: Z = 3
+                  - generic [ref=e35]:
+                    - text: x
+                    - subscript [ref=e36]: "1"
+                  - text: − 2
+                  - generic [ref=e37]:
+                    - text: x
+                    - subscript [ref=e38]: "2"
+              - generic [ref=e39]:
+                - paragraph [ref=e40]: s.a.
+                - list [ref=e41]:
+                  - listitem [ref=e42]:
+                    - generic [ref=e43]:
+                      - text: "2"
+                      - generic [ref=e44]:
+                        - text: x
+                        - subscript [ref=e45]: "1"
+                      - text: + 1/3
+                      - generic [ref=e46]:
+                        - text: x
+                        - subscript [ref=e47]: "2"
+                      - text: ≤ 35
+                  - listitem [ref=e48]:
+                    - generic [ref=e49]:
+                      - generic [ref=e50]:
+                        - text: x
+                        - subscript [ref=e51]: "1"
+                      - text: +
+                      - generic [ref=e52]:
+                        - text: x
+                        - subscript [ref=e53]: "2"
+                      - text: ≥ 5/2
+        - generic [ref=e56]:
+          - tablist [ref=e57]:
+            - tab "Modelo" [selected] [ref=e58]
+            - tab "Método gráfico" [ref=e59]
+            - tab "Simplex" [ref=e60]
+            - tab "Interpretación" [ref=e61]
+          - tabpanel [ref=e62]:
+            - generic [ref=e63]:
+              - button "Copiar como texto" [ref=e65]
+              - region [ref=e66]:
+                - heading "Variables de decisión" [level=3] [ref=e67]
+                - list [ref=e68]:
+                  - listitem [ref=e69]:
+                    - generic [ref=e70]:
+                      - generic [ref=e71]:
+                        - text: x
+                        - subscript [ref=e72]: "1"
+                      - text: = cantidad de Mesas que se producirán.
+                  - listitem [ref=e73]:
+                    - generic [ref=e74]:
+                      - generic [ref=e75]:
+                        - text: x
+                        - subscript [ref=e76]: "2"
+                      - text: = cantidad de Sillas que se producirán.
+              - region [ref=e77]:
+                - heading "Función objetivo" [level=3] [ref=e78]
+                - paragraph [ref=e79]:
+                  - generic [ref=e80]: Maximizar
+                  - generic [ref=e81]:
+                    - text: Z = 3
+                    - generic [ref=e82]:
+                      - text: x
+                      - subscript [ref=e83]: "1"
+                    - text: − 2
+                    - generic [ref=e84]:
+                      - text: x
+                      - subscript [ref=e85]: "2"
+              - region [ref=e86]:
+                - heading "Restricciones" [level=3] [ref=e87]
+                - list [ref=e88]:
+                  - listitem [ref=e89]:
+                    - generic [ref=e90]: 1. Horas
+                    - generic [ref=e92]:
+                      - text: "2"
+                      - generic [ref=e93]:
+                        - text: x
+                        - subscript [ref=e94]: "1"
+                      - text: + 1/3
+                      - generic [ref=e95]:
+                        - text: x
+                        - subscript [ref=e96]: "2"
+                      - text: ≤ 35
+                  - listitem [ref=e97]:
+                    - generic [ref=e98]: 2. Madera
+                    - generic [ref=e100]:
+                      - generic [ref=e101]:
+                        - text: x
+                        - subscript [ref=e102]: "1"
+                      - text: +
+                      - generic [ref=e103]:
+                        - text: x
+                        - subscript [ref=e104]: "2"
+                      - text: ≥ 5/2
+              - region [ref=e105]:
+                - heading "Condiciones" [level=3] [ref=e106]
+                - paragraph [ref=e107]:
+                  - generic [ref=e108]:
+                    - generic [ref=e109]:
+                      - text: x
+                      - subscript [ref=e110]: "1"
+                    - text: ","
+                    - generic [ref=e111]:
+                      - text: x
+                      - subscript [ref=e112]: "2"
+                    - text: son números enteros no negativos
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e118] [cursor=pointer]

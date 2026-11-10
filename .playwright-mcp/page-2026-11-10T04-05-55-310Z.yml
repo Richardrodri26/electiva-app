@@ -1,0 +1,91 @@
+- generic [active] [ref=f12e1]:
+  - banner [ref=f12e2]:
+    - generic [ref=f12e3]:
+      - link "Programación lineal" [ref=f12e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f12e5]:
+        - button "Historial" [ref=f12e6]
+        - button "Cambiar el tema de color" [ref=f12e7]
+  - main [ref=f12e8]:
+    - generic [ref=f12e9]:
+      - generic [ref=f12e10]:
+        - generic [ref=f12e11]:
+          - button "← Editar" [ref=f12e12] [cursor=pointer]
+          - paragraph [ref=f12e13]:
+            - generic [ref=f12e14]:
+              - text: max Z = 3
+              - generic [ref=f12e15]:
+                - text: x
+                - subscript [ref=f12e16]: "1"
+              - text: + 2
+              - generic [ref=f12e17]:
+                - text: x
+                - subscript [ref=f12e18]: "2"
+        - generic [ref=f12e19]:
+          - group "Formato de los números" [ref=f12e20]:
+            - button "Fracción" [pressed] [ref=f12e21]
+            - button "Decimal" [ref=f12e22]
+          - button "Copiar enlace" [ref=f12e23]
+          - button "Más acciones" [ref=f12e24]: ⋯
+      - generic [ref=f12e25]:
+        - complementary "Modelo" [ref=f12e26]:
+          - generic [ref=f12e28]:
+            - generic [ref=f12e29]: Modelo
+            - generic [ref=f12e31]:
+              - paragraph [ref=f12e32]:
+                - generic [ref=f12e33]: Maximizar
+                - generic [ref=f12e34]:
+                  - text: Z = 3
+                  - generic [ref=f12e35]:
+                    - text: x
+                    - subscript [ref=f12e36]: "1"
+                  - text: + 2
+                  - generic [ref=f12e37]:
+                    - text: x
+                    - subscript [ref=f12e38]: "2"
+              - generic [ref=f12e39]:
+                - paragraph [ref=f12e40]: s.a.
+                - list [ref=f12e41]:
+                  - listitem [ref=f12e42]:
+                    - generic [ref=f12e43]:
+                      - text: "2"
+                      - generic [ref=f12e44]:
+                        - text: x
+                        - subscript [ref=f12e45]: "1"
+                      - text: + 5
+                      - generic [ref=f12e46]:
+                        - text: x
+                        - subscript [ref=f12e47]: "2"
+                      - text: ≤ 35
+                  - listitem [ref=f12e48]:
+                    - generic [ref=f12e49]:
+                      - text: −3
+                      - generic [ref=f12e50]:
+                        - text: x
+                        - subscript [ref=f12e51]: "1"
+                      - text: + 2
+                      - generic [ref=f12e52]:
+                        - text: x
+                        - subscript [ref=f12e53]: "2"
+                      - text: ≥ -18
+                  - listitem [ref=f12e54]:
+                    - generic [ref=f12e55]:
+                      - text: "2"
+                      - generic [ref=f12e56]:
+                        - text: x
+                        - subscript [ref=f12e57]: "1"
+                      - text: + 4
+                      - generic [ref=f12e58]:
+                        - text: x
+                        - subscript [ref=f12e59]: "2"
+                      - text: ≤ 26
+        - generic [ref=f12e62]:
+          - tablist [ref=f12e63]:
+            - tab "Modelo" [ref=f12e64]
+            - tab "Método gráfico" [ref=f12e65]
+            - tab "Simplex" [selected] [ref=f12e66]
+            - tab "Interpretación" [ref=f12e67]
+          - tabpanel [ref=f12e68]:
+            - generic "Resolviendo el modelo" [ref=f12e69]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f12e77] [cursor=pointer]
