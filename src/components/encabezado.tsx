@@ -41,7 +41,7 @@ export function Encabezado() {
 
   return (
     <header className="border-b border-border print:hidden">
-      <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-4 px-4">
+      <div className="mx-auto flex h-14 w-full max-w-7xl items-center justify-between gap-4 px-4">
         <Link
           href="/"
           className="inline-flex min-h-11 items-center rounded-md text-base font-bold leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"

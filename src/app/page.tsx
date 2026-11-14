@@ -6,7 +6,7 @@ import { Inicio } from "@/features/inicio/inicio";
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-10">
+    <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-10">
       <Inicio />
     </main>
   );
