@@ -80,7 +80,14 @@ export function useBorradorEditor(): UseBorradorEditorResultado {
     [],
   );
 
+  // true una vez que el modelo se envió a resolver: ningún autoguardado pendiente o tardío
+  // debe volver a escribir el borrador que se acaba de descartar.
+  const descartado = useRef(false);
+
   function guardarBorrador(valor: BorradorEditor): void {
+    if (descartado.current) {
+      return;
+    }
     if (temporizador.current !== null) {
       clearTimeout(temporizador.current);
     }
@@ -90,6 +97,11 @@ export function useBorradorEditor(): UseBorradorEditorResultado {
   }
 
   function limpiarBorradorGuardado(): void {
+    descartado.current = true;
+    if (temporizador.current !== null) {
+      clearTimeout(temporizador.current);
+      temporizador.current = null;
+    }
     borrar(CLAVE_BORRADOR_EDITOR);
   }
 

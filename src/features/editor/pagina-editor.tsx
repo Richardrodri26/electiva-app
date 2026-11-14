@@ -8,10 +8,15 @@
 
 import { useRouter } from "next/navigation";
 
+import { useClaveDeReaparicion } from "@/lib/use-clave-de-reaparicion";
+
 import { Editor } from "./editor";
 
 export function PaginaEditor() {
   const router = useRouter();
+  // Next conserva el estado de la pantalla al navegar (ver `use-clave-de-reaparicion.ts`):
+  // la clave remonta el editor al volver, para no heredar el ejercicio anterior.
+  const clave = useClaveDeReaparicion();
 
-  return <Editor onResolver={(url) => router.push(url)} />;
+  return <Editor key={clave} onResolver={(url) => router.push(url)} />;
 }

@@ -29,12 +29,13 @@
 
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
 import { borrar, guardar } from "@/lib/almacenamiento";
+import { useClaveDeReaparicion } from "@/lib/use-clave-de-reaparicion";
 
 import { AsistentePasos } from "./asistente-pasos";
 import { BannerBorradorSinTerminar } from "./banner-borrador-sin-terminar";
@@ -90,7 +91,17 @@ function obtenerInstantaneaServidor(): BorradorGuardado | null {
   return null;
 }
 
-export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
+/**
+ * Con `cacheComponents` Next conserva el estado de la pantalla al navegar a otra: la clave
+ * de reaparición remonta el asistente al volver (ver `use-clave-de-reaparicion.ts`), así un
+ * ejercicio nuevo no hereda el anterior. Un borrador sin terminar se ofrece con el banner.
+ */
+export function Asistente(props: AsistenteProps) {
+  const clave = useClaveDeReaparicion();
+  return <AsistenteConEstado key={clave} {...props} />;
+}
+
+function AsistenteConEstado({ onModeloCompleto, className }: AsistenteProps) {
   const router = useRouter();
   const { paso, irAPaso } = usePasoAsistente();
   const [borrador, setBorrador] = useState<BorradorAsistente>(() => crearBorradorAsistente());
@@ -98,6 +109,15 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
   // true recién después del primer avance de paso real — evita persistir (y ofrecer
   // "continuar" sobre) un borrador vacío que el usuario nunca llegó a tocar.
   const haIniciadoRef = useRef(false);
+  // Al ocultarse la pantalla (Next conserva su estado, ver `use-clave-de-reaparicion.ts`) se
+  // desarma el autoguardado: al reaparecer, los efectos vuelven a correr con el estado viejo
+  // y el paso de la URL nueva, y pisarían el borrador guardado antes del remonte.
+  useLayoutEffect(
+    () => () => {
+      haIniciadoRef.current = false;
+    },
+    [],
+  );
   // Sección puntual en corrección (paso 2 u 3, ver `corregirObjetivo`/`corregirLimitaciones`):
   // su "Continuar" debe volver directo al paso 5, no seguir la secuencia normal.
   const [corrigiendoSeccion, setCorrigiendoSeccion] = useState(false);
@@ -241,6 +261,12 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
     haIniciadoRef.current = false;
   }
 
+  /** "Resolver modelo": el modelo pasa al Historial y viaja en `?m=`, el borrador ya no hace falta. */
+  function manejarResolverModelo(): void {
+    borrar(CLAVE_BORRADOR_ASISTENTE);
+    haIniciadoRef.current = false;
+  }
+
   /** "Cancelar", ya confirmado el diálogo: borra el borrador y vuelve al inicio. */
   function manejarCancelarConfirmado(): void {
     borrar(CLAVE_BORRADOR_ASISTENTE);
@@ -316,6 +342,7 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
           onCorregirLimitaciones={manejarCorregirLimitaciones}
           onCorregirNaturaleza={manejarCorregirNaturaleza}
           onCorregirTodo={manejarCorregirTodo}
+          onAntesDeResolver={manejarResolverModelo}
           onCancelarConfirmado={manejarCancelarConfirmado}
         />
       ) : null}

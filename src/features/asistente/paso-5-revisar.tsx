@@ -71,6 +71,8 @@ export interface Paso5RevisarProps {
   onCorregirTodo: () => void;
   /** Se llama ya confirmado el diálogo de "Cancelar". */
   onCancelarConfirmado: () => void;
+  /** Se llama justo antes de navegar a los resultados (descartar el borrador). */
+  onAntesDeResolver?: () => void;
 }
 
 export function Paso5Revisar({
@@ -81,11 +83,13 @@ export function Paso5Revisar({
   onCorregirNaturaleza,
   onCorregirTodo,
   onCancelarConfirmado,
+  onAntesDeResolver,
 }: Paso5RevisarProps) {
   const router = useRouter();
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
 
   function manejarResolverModelo(): void {
+    onAntesDeResolver?.();
     router.push(construirUrlResolver(modelo));
   }
 
