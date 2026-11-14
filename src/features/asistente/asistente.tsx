@@ -34,11 +34,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { ModeloLineal } from "@/dominio/modelo/tipos";
-import { borrar, guardar } from "@/lib/almacenamiento";
+import { BannerBorradorSinTerminar } from "@/components/comunes/banner-borrador-sin-terminar";
+import { borrar, guardar, instantaneaServidorVacia, suscribirACambiosDeAlmacenamiento } from "@/lib/almacenamiento";
 import { useClaveDeReaparicion } from "@/lib/use-clave-de-reaparicion";
 
 import { AsistentePasos } from "./asistente-pasos";
-import { BannerBorradorSinTerminar } from "./banner-borrador-sin-terminar";
 import {
   CLAVE_BORRADOR_ASISTENTE,
   obtenerInstantaneaBorradorGuardado,
@@ -79,18 +79,6 @@ function reajustarCoeficientes(actuales: string[], cantidad: number): string[] {
   return [...actuales, ...crearCoeficientesVacios(cantidad - actuales.length)];
 }
 
-/** `useSyncExternalStore` para el borrador guardado — ver nota arriba sobre por qué no
- * es un `useEffect` + `setState`. Referencias de módulo estables (no se recrean en
- * cada render), como pide la API de `useSyncExternalStore`. */
-function suscribirABorradorGuardado(notificar: () => void): () => void {
-  window.addEventListener("storage", notificar);
-  return () => window.removeEventListener("storage", notificar);
-}
-
-function obtenerInstantaneaServidor(): BorradorGuardado | null {
-  return null;
-}
-
 /**
  * Con `cacheComponents` Next conserva el estado de la pantalla al navegar a otra: la clave
  * de reaparición remonta el asistente al volver (ver `use-clave-de-reaparicion.ts`), así un
@@ -126,9 +114,9 @@ function AsistenteConEstado({ onModeloCompleto, className }: AsistenteProps) {
   // arriba sobre `useSyncExternalStore`. `bannerDescartado` lo oculta tras "Continuar" o
   // "Descartar", sin depender de que `localStorage` ya haya cambiado.
   const borradorGuardadoAlMontar = useSyncExternalStore(
-    suscribirABorradorGuardado,
+    suscribirACambiosDeAlmacenamiento,
     obtenerInstantaneaBorradorGuardado,
-    obtenerInstantaneaServidor,
+    instantaneaServidorVacia,
   );
   const [bannerDescartado, setBannerDescartado] = useState(false);
   const borradorGuardado = bannerDescartado ? null : borradorGuardadoAlMontar;

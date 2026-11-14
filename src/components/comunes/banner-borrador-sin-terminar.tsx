@@ -1,11 +1,11 @@
 /**
- * Banner "Tiene un modelo sin terminar" (`features/asistente/banner-borrador-sin-terminar.tsx`,
- * tarea T5.2) — docs/06-ux-ui.md §3.2: "El borrador persiste en `localStorage`; al
- * volver: banner [...] con [Continuar] [Descartar]".
+ * Banner "Tiene un modelo sin terminar" (`components/comunes/banner-borrador-sin-terminar.tsx`)
+ * — docs/06-ux-ui.md §3.2: "El borrador persiste en `localStorage`; al volver: banner [...]
+ * con [Retomar el modelo] [Descartar]". Lo comparten el asistente y el editor técnico.
  *
- * Componente de presentación puro: no lee `localStorage` él mismo (eso lo hace
- * `<Asistente>`, que decide si hay un borrador para ofrecer); acá solo se muestran las
- * dos acciones.
+ * Componente de presentación puro: no lee `localStorage` él mismo (eso lo decide cada
+ * pantalla, que sabe si hay un borrador para ofrecer); acá solo se muestran las dos acciones.
+ * El título usa "usted" (docs/06 lo cita en tono "tú"; T5.1 fijó "usted" para toda la app).
  */
 
 "use client";
@@ -14,7 +14,9 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "cn";
 
-import { BOTON_CONTINUAR_BORRADOR, BOTON_DESCARTAR_BORRADOR, TITULO_BANNER_BORRADOR } from "./textos";
+export const TITULO_BANNER_BORRADOR = "Tiene un modelo sin terminar";
+export const BOTON_CONTINUAR_BORRADOR = "Retomar el modelo";
+export const BOTON_DESCARTAR_BORRADOR = "Descartar";
 
 export interface BannerBorradorSinTerminarProps {
   onContinuar: () => void;

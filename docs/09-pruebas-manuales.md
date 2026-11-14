@@ -73,16 +73,22 @@ Repetir con los otros tres ejercicios y comparar:
 6. En resultados pulsar **← Editar**: vuelve al editor con el modelo cargado.
 7. Probar **Agregar una variable** (3 variables): el método gráfico queda deshabilitado (ver R9).
 8. Probar **Solo valores enteros** con "Actividad en clase" (ver R8).
+9. **Borrador**: escribir algo (p. ej. `7` en el coeficiente de x1), esperar un segundo, ir a Inicio y volver a `/modelo/editor`.
+   El formulario debe arrancar **en blanco** y mostrar el banner "Tiene un modelo sin terminar" con **Retomar el modelo**
+   (carga lo escrito) y **Descartar** (borra el borrador; al recargar no vuelve). Con `?m=` (**← Editar**) se carga ese modelo y no hay banner.
 
 ### R5 · Asistente completo (lenguaje cotidiano)
 
 Modelo "Compromiso" expresado como Mesas y Sillas. Textos literales del asistente:
 
 1. `/modelo/asistente`. **Paso 1**: elegir "Productos", llamar a la opción 1 "Mesas" y a la 2 "Sillas" → **Continuar**.
-2. **Paso 2**: meta "Mayor utilidad"; cada Mesas aporta `4`, cada Sillas `3` → **Continuar**.
+2. **Paso 2**: meta "Mayor utilidad"; responder "¿Cuánta ganancia deja cada unidad de «Mesas»?" con `4` y la de «Sillas» con `3` → **Continuar**.
+   (La pregunta se adapta a la meta elegida: ganancia, ingreso, costo, tiempo, etc.)
 3. **Paso 3** (limitaciones):
-   - Limitación 1 "Presupuesto": Mesas `2`, Sillas `1`, cantidad disponible `12`.
-   - **Agregar limitación** → se agrega colapsada; abrirla, cambiar el tipo a "Horas": Mesas `1`, Sillas `1`, cantidad `7`.
+   - Limitación 1 "Presupuesto": "¿Cuánto de «Presupuesto» usa cada unidad de «Mesas»?" `2`, la de «Sillas» `1`,
+     y "¿Cuánto hay disponible como máximo de «Presupuesto»?" `12`.
+   - **Agregar limitación** → se agrega colapsada; abrirla, cambiar el tipo a "Horas": Mesas `1`, Sillas `1`, máximo disponible `7`
+     (la pregunta del límite cambia según la forma de cumplimiento: máximo, mínimo o exacto).
    - **Continuar**.
 4. **Paso 4**: elegir "Deben ser unidades completas (enteras)" → **Continuar**.
 5. **Paso 5**: se ve el resumen del modelo. Pulsar **Resolver modelo**.
@@ -99,8 +105,9 @@ Comprobar también que **nunca** aparece vocabulario técnico (coeficiente, rest
    Corregir las opciones muestra un aviso y lleva al paso 1 con los pasos 2 y 3 pendientes.
 2. **Cancelar** pide confirmación ("¿Cancelar y borrar lo registrado?"). Con **Sí, cancelar** vuelve a **Inicio** (`/`) y borra el borrador.
 3. **Borrador**: avanzar hasta el paso 3, cerrar la pestaña y volver a `/modelo/asistente`:
-   debe ofrecer "Tiene un modelo sin terminar" con **Continuar** o **Descartar**.
+   debe ofrecer "Tiene un modelo sin terminar" con **Retomar el modelo** o **Descartar**.
    El banner no debe aparecer en plena sesión al ir avanzando de paso.
+4. El editor técnico ofrece el mismo banner (mismo componente y mismos botones) al volver a `/modelo/editor` sin `?m=` (ver R4, paso 9).
 
 ### R7 · Menú "⋯" de resultados
 

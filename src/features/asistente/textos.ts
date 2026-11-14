@@ -1,3 +1,8 @@
+import {
+  BOTON_CONTINUAR_BORRADOR,
+  BOTON_DESCARTAR_BORRADOR,
+  TITULO_BANNER_BORRADOR,
+} from "@/components/comunes/banner-borrador-sin-terminar";
 import type { CategoriaId, MetaId } from "@/dominio/modelo/tipos";
 
 /**
@@ -170,14 +175,10 @@ export const BOTON_CONFIRMAR_CANCELAR = "Sí, cancelar";
 export const BOTON_VOLVER_DIALOGO = "Volver";
 
 /**
- * Banner de borrador sin terminar (docs/06-ux-ui.md §3.2). docs/06 cita el título en
- * tono "tú" ("Tienes un modelo sin terminar"), pero T5.1 fijó "usted" para todo el
- * asistente: se usa acá la forma "usted" por consistencia con el resto de los textos
- * (ver nota de ambigüedad en el resumen de la tarea T5.2).
+ * Banner de borrador sin terminar (docs/06-ux-ui.md §3.2): los textos viven en el componente
+ * compartido; se reexportan acá para que el chequeo de vocabulario los siga cubriendo.
  */
-export const TITULO_BANNER_BORRADOR = "Tiene un modelo sin terminar";
-export const BOTON_CONTINUAR_BORRADOR = "Retomar el modelo";
-export const BOTON_DESCARTAR_BORRADOR = "Descartar";
+export { TITULO_BANNER_BORRADOR, BOTON_CONTINUAR_BORRADOR, BOTON_DESCARTAR_BORRADOR };
 
 // ---------------------------------------------------------------------------
 // Navegación — docs/06-ux-ui.md §3.2

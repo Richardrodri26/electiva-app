@@ -12,7 +12,7 @@
 
 import { z } from "zod";
 
-import { leer, leerCrudo } from "@/lib/almacenamiento";
+import { crearInstantaneaAlmacenada } from "@/lib/almacenamiento";
 
 import type { BorradorAsistente } from "./estado";
 import type { NumeroPasoAsistente } from "./use-paso-asistente";
@@ -77,30 +77,10 @@ export const esquemaBorradorGuardado: z.ZodType<BorradorGuardado> = z.object({
   pasoMaximoAlcanzado: z.custom<NumeroPasoAsistente>(esPasoValido),
 });
 
-// ---------------------------------------------------------------------------
-// `getSnapshot` para `useSyncExternalStore` (banner "modelo sin terminar")
-// ---------------------------------------------------------------------------
-//
-// `leer(...)` parsea JSON de nuevo en cada llamada: devuelve un objeto NUEVO (distinta
-// referencia) aun cuando el contenido de `localStorage` no cambió. `useSyncExternalStore`
-// exige que su `getSnapshot` devuelva la MISMA referencia mientras el store no cambie — si
-// no, React entiende que hay "tearing" y vuelve a renderizar sin parar ("The result of
-// getSnapshot should be cached to avoid an infinite loop"). Por eso esta función compara el
-// string CRUDO (`leerCrudo`, sin parsear) contra el último visto, y solo vuelve a parsear
-// cuando ese string efectivamente cambió. NO quitar este cache: si se reemplaza por una
-// llamada directa a `leer`, vuelve el loop infinito.
-
-let ultimoCrudo: string | null = null;
-let ultimoValor: BorradorGuardado | null = null;
-
-/** `getSnapshot` estable para `useSyncExternalStore`. Nunca lanza. */
-export function obtenerInstantaneaBorradorGuardado(): BorradorGuardado | null {
-  const crudo = leerCrudo(CLAVE_BORRADOR_ASISTENTE);
-
-  if (crudo !== ultimoCrudo) {
-    ultimoCrudo = crudo;
-    ultimoValor = leer(CLAVE_BORRADOR_ASISTENTE, esquemaBorradorGuardado);
-  }
-
-  return ultimoValor;
-}
+// `getSnapshot` estable para `useSyncExternalStore` (banner "modelo sin terminar"): ver
+// `crearInstantaneaAlmacenada` en `lib/almacenamiento.ts` (NO reemplazar por `leer` directo:
+// vuelve el loop infinito de render).
+export const obtenerInstantaneaBorradorGuardado: () => BorradorGuardado | null = crearInstantaneaAlmacenada(
+  CLAVE_BORRADOR_ASISTENTE,
+  esquemaBorradorGuardado,
+);

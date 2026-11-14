@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import { borrar, guardar, leer, leerCrudo } from "./almacenamiento";
+import { borrar, crearInstantaneaAlmacenada, guardar, leer, leerCrudo } from "./almacenamiento";
 
 /** `Storage` mínimo en memoria, para no depender de jsdom (`vitest.config.mts`: `environment: "node"`). */
 function crearAlmacenFalso(): Storage {
@@ -109,5 +109,21 @@ describe("almacenamiento", () => {
     vi.stubGlobal("localStorage", almacen);
 
     expect(leer("clave", esquema)).toBeNull();
+  });
+
+  it("crearInstantaneaAlmacenada devuelve la MISMA referencia mientras el contenido no cambia", () => {
+    vi.stubGlobal("localStorage", crearAlmacenFalso());
+    const instantanea = crearInstantaneaAlmacenada("clave", esquema);
+
+    expect(instantanea()).toBeNull();
+    guardar("clave", { n: 1 });
+    const primera = instantanea();
+    expect(primera).toEqual({ n: 1 });
+    expect(instantanea()).toBe(primera);
+
+    guardar("clave", { n: 2 });
+    expect(instantanea()).toEqual({ n: 2 });
+    borrar("clave");
+    expect(instantanea()).toBeNull();
   });
 });

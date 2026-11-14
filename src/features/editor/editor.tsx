@@ -28,6 +28,7 @@ import { LIMITE_RESTRICCIONES, LIMITE_VARIABLES, nombreNoVacio, numeroEditor } f
 import { serializarModelo } from "@/dominio/modelo/serializacion";
 import type { Relacion, Variable } from "@/dominio/modelo/tipos";
 
+import { BannerBorradorSinTerminar } from "@/components/comunes/banner-borrador-sin-terminar";
 import { Expresion } from "@/components/comunes/expresion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -131,7 +132,14 @@ function Autoguardado({ valores, guardar }: { valores: BorradorEditor; guardar: 
 }
 
 export function Editor({ onResolver, className }: EditorProps) {
-  const { borradorInicial, borradorRestaurado, guardarBorrador, limpiarBorradorGuardado } = useBorradorEditor();
+  const {
+    borradorInicial,
+    borradorPendiente,
+    retomarBorradorPendiente,
+    descartarBorradorPendiente,
+    guardarBorrador,
+    limpiarBorradorGuardado,
+  } = useBorradorEditor();
   const [erroresEnvio, setErroresEnvio] = useState<string[]>([]);
   const vistaDeseada = useRef<"simplex" | "grafico">("simplex");
   const ejemplos = useEjemplos();
@@ -155,18 +163,18 @@ export function Editor({ onResolver, className }: EditorProps) {
     },
   });
 
-  // El borrador guardado de localStorage solo puede leerse recién montado en el cliente
-  // (ver `use-borrador-editor.ts`): cuando llega, reemplaza los valores Y los defaults del
-  // formulario (`form.reset`, no `setState`: TanStack Form no re-lee `defaultValues` solo).
-  // Va en un efecto (no durante el render): leer/mutar un ref durante el render está
-  // prohibido por las reglas de hooks del proyecto.
-  useEffect(() => {
-    if (borradorRestaurado !== null) {
-      form.reset(borradorRestaurado);
+  /**
+   * "Retomar el modelo": carga el borrador guardado. `keepDefaultValues` es imprescindible:
+   * `useForm` llama a `form.update(opciones)` en CADA render de `<Editor>`, y si el `reset`
+   * hubiera reemplazado los defaults, el re-render que oculta el banner volvería a aplicar
+   * `borradorInicial` (el formulario en blanco) encima del borrador recién cargado.
+   */
+  function retomarBorrador(): void {
+    const borrador = retomarBorradorPendiente();
+    if (borrador !== null) {
+      form.reset(borrador, { keepDefaultValues: true });
     }
-    // Solo debe aplicarse cuando `borradorRestaurado` pasa de `null` a un valor (una vez).
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [borradorRestaurado]);
+  }
 
   function cargarEjemplo(ejemplo: Ejemplo): void {
     form.reset(borradorDesdeModelo(ejemplo.modelo));
@@ -181,6 +189,13 @@ export function Editor({ onResolver, className }: EditorProps) {
 
   return (
     <div className={className}>
+      {borradorPendiente !== null ? (
+        <BannerBorradorSinTerminar
+          onContinuar={retomarBorrador}
+          onDescartar={descartarBorradorPendiente}
+          className="mb-6"
+        />
+      ) : null}
       <form
         noValidate
         onSubmit={(evento) => {

@@ -110,3 +110,41 @@ export function borrar(clave: string): void {
     // No hay nada más que hacer si falla el borrado.
   }
 }
+
+// ---------------------------------------------------------------------------
+// Lectura reactiva para `useSyncExternalStore` (borradores "sin terminar")
+// ---------------------------------------------------------------------------
+
+/**
+ * `subscribe` de `useSyncExternalStore` para `localStorage`: avisa cuando OTRA pestaña
+ * cambia el almacenamiento (el evento `storage` no se dispara en la pestaña que escribe).
+ * Referencia de módulo estable, como exige la API.
+ */
+export function suscribirACambiosDeAlmacenamiento(notificar: () => void): () => void {
+  window.addEventListener("storage", notificar);
+  return () => window.removeEventListener("storage", notificar);
+}
+
+/** `getServerSnapshot` común: en el servidor no hay `localStorage`, así que no hay nada guardado. */
+export function instantaneaServidorVacia(): null {
+  return null;
+}
+
+/**
+ * Crea un `getSnapshot` ESTABLE para `useSyncExternalStore` sobre `clave`. `leer(...)`
+ * parsea JSON en cada llamada y devuelve un objeto nuevo aunque nada cambió; React exige la
+ * MISMA referencia mientras el store no cambie (si no, renderiza sin parar). Por eso se
+ * compara el string CRUDO contra el último visto y solo se vuelve a parsear si cambió.
+ */
+export function crearInstantaneaAlmacenada<T>(clave: string, esquema: z.ZodType<T>): () => T | null {
+  let ultimoCrudo: string | null = null;
+  let ultimoValor: T | null = null;
+  return () => {
+    const crudo = leerCrudo(clave);
+    if (crudo !== ultimoCrudo) {
+      ultimoCrudo = crudo;
+      ultimoValor = leer(clave, esquema);
+    }
+    return ultimoValor;
+  };
+}

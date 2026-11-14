@@ -10,10 +10,11 @@
  *   modelo existente manda sobre cualquier borrador guardado); si no, se arranca en blanco.
  *   nuqs resuelve `?m=` igual en servidor y cliente, así que esto no causa un desajuste de
  *   hidratación.
- * - `borradorRestaurado`: el borrador guardado en `localStorage` (`pl:borrador:editor`), que
- *   solo puede leerse recién montado en el cliente (en el servidor `localStorage` no existe)
- *   y SOLO si no se cargó desde `?m=`. `<Editor>` lo aplica con `form.reset(...)` cuando deja
- *   de ser `null` — ver el componente para el porqué de ese paso extra.
+ * - `borradorPendiente`: el borrador guardado en `localStorage` (`pl:borrador:editor`), que NO se
+ *   aplica en silencio: se ofrece con el banner compartido ("Tiene un modelo sin terminar" /
+ *   "Retomar el modelo" / "Descartar"), igual que el asistente. Solo se ofrece sin `?m=`, si
+ *   no está en blanco y mientras no se haya resuelto el banner; mientras está pendiente el
+ *   autoguardado queda suspendido para no pisarlo con el formulario vacío.
  *
  * Autoguardado (debounce 500 ms, docs/02 §3): `guardarBorrador` se llama desde `<Editor>` en
  * cada cambio de los valores del formulario (vía `form.Subscribe`); este hook es el único
@@ -22,10 +23,16 @@
 
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useQueryState } from "nuqs";
 
-import { borrar, guardar, leer } from "@/lib/almacenamiento";
+import {
+  borrar,
+  crearInstantaneaAlmacenada,
+  guardar,
+  instantaneaServidorVacia,
+  suscribirACambiosDeAlmacenamiento,
+} from "@/lib/almacenamiento";
 import { CLAVE_MODELO, parseAsModelo } from "@/lib/url-state";
 
 import { borradorDesdeModelo, crearBorradorEditor, esquemaBorradorEditor, type BorradorEditor } from "./estado";
@@ -38,12 +45,24 @@ export interface UseBorradorEditorResultado {
   borradorInicial: BorradorEditor;
   /** `true` si `borradorInicial` vino de `?m=` (se está editando un modelo existente). */
   cargadoDesdeUrl: boolean;
-  /** El borrador restaurado de `localStorage`, listo para aplicar con `form.reset(...)`; `null` hasta que esté disponible (o si no corresponde restaurar nada). */
-  borradorRestaurado: BorradorEditor | null;
+  /** El borrador sin terminar guardado en `localStorage` que se ofrece con el banner; `null` si no hay nada que ofrecer (sin borrador, en blanco, ya resuelto o con `?m=`). */
+  borradorPendiente: BorradorEditor | null;
+  /** "Retomar el modelo": oculta el banner y devuelve el borrador para aplicar con `form.reset(...)`. */
+  retomarBorradorPendiente: () => BorradorEditor | null;
+  /** "Descartar": borra el borrador guardado y oculta el banner (el formulario sigue en blanco). */
+  descartarBorradorPendiente: () => void;
   /** Autoguardado con debounce; llamar en cada cambio de los valores del formulario. */
   guardarBorrador: (valor: BorradorEditor) => void;
   /** Borra el borrador autoguardado de `localStorage`. */
   limpiarBorradorGuardado: () => void;
+}
+
+/** `getSnapshot` estable del borrador guardado (ver `crearInstantaneaAlmacenada`). */
+const obtenerInstantaneaBorradorEditor = crearInstantaneaAlmacenada(CLAVE_BORRADOR_EDITOR, esquemaBorradorEditor);
+
+/** `true` si el borrador guardado no aporta nada que ofrecer retomar (igual al formulario en blanco). */
+function esBorradorEnBlanco(borrador: BorradorEditor): boolean {
+  return JSON.stringify(borrador) === JSON.stringify(crearBorradorEditor());
 }
 
 export function useBorradorEditor(): UseBorradorEditorResultado {
@@ -54,21 +73,40 @@ export function useBorradorEditor(): UseBorradorEditorResultado {
     modeloUrl !== null ? borradorDesdeModelo(modeloUrl) : crearBorradorEditor(),
   );
 
-  const [borradorRestaurado, setBorradorRestaurado] = useState<BorradorEditor | null>(null);
+  // El borrador guardado se lee con `useSyncExternalStore` (igual que el asistente): el
+  // snapshot del servidor es `null`, así que no hay desajuste de hidratación. Nunca se
+  // aplica solo: se ofrece con el banner y el formulario arranca en blanco.
+  const guardado = useSyncExternalStore(
+    suscribirACambiosDeAlmacenamiento,
+    obtenerInstantaneaBorradorEditor,
+    instantaneaServidorVacia,
+  );
+  const [bannerResuelto, setBannerResuelto] = useState(false);
+  // Con `?m=` manda el modelo de la URL: no se ofrece ningún borrador.
+  const borradorPendiente =
+    cargadoDesdeUrl || bannerResuelto || guardado === null || esBorradorEnBlanco(guardado) ? null : guardado;
+
+  // Mientras el banner está pendiente el autoguardado NO puede pisar el borrador guardado
+  // con el formulario en blanco. Va en una ref (y no en el estado) A PROPÓSITO: así
+  // `guardarBorrador` y `limpiarBorradorGuardado` conservan su identidad entre renders.
+  // `<Editor>` los usa en las opciones de `useForm`; si cambiaran, TanStack Form volvería a
+  // aplicar `defaultValues` (el formulario en blanco) encima de lo que dejó `form.reset(...)`.
+  const bloqueado = useRef(false);
   useEffect(() => {
-    if (cargadoDesdeUrl) {
-      return;
-    }
-    const guardado = leer(CLAVE_BORRADOR_EDITOR, esquemaBorradorEditor);
-    if (guardado !== null) {
-      // Sincroniza con `localStorage` (un store externo que no se puede leer durante el
-      // render en el servidor): es, a propósito, el único lugar donde se aplica.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setBorradorRestaurado(guardado);
-    }
-    // Solo al montar: `cargadoDesdeUrl` no debería cambiar durante la vida de la página.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    bloqueado.current = borradorPendiente !== null;
+  }, [borradorPendiente]);
+
+  function retomarBorradorPendiente(): BorradorEditor | null {
+    bloqueado.current = false;
+    setBannerResuelto(true);
+    return borradorPendiente;
+  }
+
+  function descartarBorradorPendiente(): void {
+    bloqueado.current = false;
+    borrar(CLAVE_BORRADOR_EDITOR);
+    setBannerResuelto(true);
+  }
 
   const temporizador = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -85,13 +123,17 @@ export function useBorradorEditor(): UseBorradorEditorResultado {
   const descartado = useRef(false);
 
   function guardarBorrador(valor: BorradorEditor): void {
-    if (descartado.current) {
-      return;
-    }
     if (temporizador.current !== null) {
       clearTimeout(temporizador.current);
+      temporizador.current = null;
+    }
+    if (descartado.current || bloqueado.current) {
+      return;
     }
     temporizador.current = setTimeout(() => {
+      if (bloqueado.current || descartado.current) {
+        return;
+      }
       guardar(CLAVE_BORRADOR_EDITOR, valor);
     }, DEMORA_AUTOGUARDADO_MS);
   }
@@ -105,5 +147,13 @@ export function useBorradorEditor(): UseBorradorEditorResultado {
     borrar(CLAVE_BORRADOR_EDITOR);
   }
 
-  return { borradorInicial, cargadoDesdeUrl, borradorRestaurado, guardarBorrador, limpiarBorradorGuardado };
+  return {
+    borradorInicial,
+    cargadoDesdeUrl,
+    borradorPendiente,
+    retomarBorradorPendiente,
+    descartarBorradorPendiente,
+    guardarBorrador,
+    limpiarBorradorGuardado,
+  };
 }

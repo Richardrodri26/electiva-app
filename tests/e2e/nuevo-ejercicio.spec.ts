@@ -33,6 +33,17 @@ async function completarAsistenteHastaRevisar(page: Page): Promise<void> {
   await expect(page).toHaveURL(/paso=5/);
 }
 
+const CLAVE_BORRADOR_EDITOR = "pl:borrador:editor";
+
+/** Escribe algo en el editor y espera a que el autoguardado (debounce) lo persista. */
+async function escribirEnEditorYEsperarAutoguardado(page: Page): Promise<void> {
+  await page.goto("/modelo/editor");
+  await page.getByLabel("Coeficiente de x1 en Z").fill("7");
+  await expect
+    .poll(() => page.evaluate((clave) => localStorage.getItem(clave), CLAVE_BORRADOR_EDITOR))
+    .toContain('"7"');
+}
+
 async function irAInicio(page: Page): Promise<void> {
   await page.getByRole("link", { name: "Programación lineal" }).click();
   await expect(page).toHaveURL("/");
@@ -85,6 +96,7 @@ test.describe("Ejercicio nuevo sin datos del anterior", () => {
 
     await expect(page).toHaveURL(/\/modelo\/editor$/);
     await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("");
+    await expect(page.getByText("Tiene un modelo sin terminar")).toHaveCount(0);
   });
 
   test("editor: \"← Editar\" desde los resultados conserva el modelo", async ({ page }) => {
@@ -98,5 +110,62 @@ test.describe("Ejercicio nuevo sin datos del anterior", () => {
 
     await expect(page).toHaveURL(/\/modelo\/editor\?m=/);
     await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("3");
+  });
+
+  test("editor: un borrador sin terminar se ofrece con banner y el formulario arranca en blanco; \"Retomar el modelo\" lo restaura", async ({
+    page,
+  }) => {
+    await escribirEnEditorYEsperarAutoguardado(page);
+
+    await irAInicio(page);
+    await page.getByRole("link", { name: "Abrir editor" }).click();
+
+    await expect(page).toHaveURL(/\/modelo\/editor$/);
+    await expect(page.getByText("Tiene un modelo sin terminar")).toBeVisible();
+    await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("");
+
+    // Con el banner pendiente el autoguardado no pisa el borrador guardado con el formulario en blanco.
+    await page.waitForTimeout(900);
+    expect(await page.evaluate((clave) => localStorage.getItem(clave), CLAVE_BORRADOR_EDITOR)).toContain('"7"');
+
+    await page.getByRole("button", { name: "Retomar el modelo" }).click();
+    await expect(page.getByText("Tiene un modelo sin terminar")).toHaveCount(0);
+    await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("7");
+  });
+
+  test("editor: \"Descartar\" deja el formulario en blanco y el banner no vuelve al recargar", async ({ page }) => {
+    await escribirEnEditorYEsperarAutoguardado(page);
+
+    await irAInicio(page);
+    await page.getByRole("link", { name: "Abrir editor" }).click();
+    await expect(page.getByText("Tiene un modelo sin terminar")).toBeVisible();
+
+    await page.getByRole("button", { name: "Descartar" }).click();
+    await expect(page.getByText("Tiene un modelo sin terminar")).toHaveCount(0);
+    await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("");
+
+    await page.reload();
+    await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("");
+    await expect(page.getByText("Tiene un modelo sin terminar")).toHaveCount(0);
+  });
+
+  test("editor: con ?m= se carga ese modelo y no se muestra el banner aunque haya un borrador", async ({ page }) => {
+    await page.goto("/modelo/editor");
+    await page.getByRole("button", { name: "Cargar ejemplo" }).click();
+    await page.getByRole("menuitem", { name: "Clase · ejemplo principal" }).click();
+    await page.getByRole("button", { name: "Resolver con Simplex" }).click();
+    await expect(page).toHaveURL(/\/resolver\?.*vista=simplex/);
+    const urlEditar = new URL((await page.getByRole("link", { name: "Editar" }).getAttribute("href")) ?? "", page.url());
+
+    // Hay un borrador sin terminar distinto guardado, pero ?m= gana.
+    await page.goto("/modelo/editor");
+    await page.getByLabel("Coeficiente de x1 en Z").fill("9");
+    await expect
+      .poll(() => page.evaluate((clave) => localStorage.getItem(clave), CLAVE_BORRADOR_EDITOR))
+      .toContain('"9"');
+
+    await page.goto(urlEditar.pathname + urlEditar.search);
+    await expect(page.getByLabel("Coeficiente de x1 en Z")).toHaveValue("3");
+    await expect(page.getByText("Tiene un modelo sin terminar")).toHaveCount(0);
   });
 });
