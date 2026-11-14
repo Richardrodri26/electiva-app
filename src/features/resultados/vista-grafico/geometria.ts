@@ -202,3 +202,18 @@ export function calcularFlechaMejora(
     hasta: { x1: anclaje.x1 + ux * longitud, x2: anclaje.x2 + uy * longitud },
   };
 }
+
+/**
+ * Redondea el máximo de un dominio hacia arriba a un múltiplo "lindo" (paso 1, 2 o 5 × 10^k,
+ * con ~6 divisiones). Se calcula UNA sola vez y se usa en ambos ejes: el `nice` propio de cada
+ * eje redondearía distinto cada uno y rompería el dominio compartido (y el aspecto 1:1).
+ */
+export function redondearMaximoLindo(maximo: number): number {
+  if (!Number.isFinite(maximo) || maximo <= 0) {
+    return 1;
+  }
+  const bruto = maximo / 6;
+  const potencia = 10 ** Math.floor(Math.log10(bruto));
+  const paso = [1, 2, 5, 10].map((m) => m * potencia).find((p) => p >= bruto) ?? 10 * potencia;
+  return Math.ceil(maximo / paso - 1e-9) * paso;
+}

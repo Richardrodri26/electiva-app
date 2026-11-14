@@ -58,7 +58,7 @@ export function ColumnaModelo({ modelo, formato, resultado }: ColumnaModeloProps
   return (
     <>
       {/* Escritorio (≥1024px): siempre visible, sticky (docs/06 §3.4). */}
-      <aside aria-label="Modelo" className="hidden lg:block lg:w-72 lg:shrink-0">
+      <aside aria-label="Modelo" className="hidden lg:block lg:w-60 lg:shrink-0 xl:w-72">
         <div className="lg:sticky lg:top-20">
           <ContenidoModelo modelo={modelo} formato={formato} resultado={resultado} />
         </div>

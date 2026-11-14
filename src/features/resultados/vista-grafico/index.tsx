@@ -63,9 +63,9 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
 
   if (resultado.isPending) {
     return (
-      <div className="flex flex-col gap-4 lg:flex-row" aria-busy="true">
+      <div className="flex flex-col gap-4 xl:flex-row" aria-busy="true">
         <Skeleton className="aspect-square flex-1" />
-        <Skeleton className="h-64 lg:w-80" />
+        <Skeleton className="h-64 xl:w-80" />
       </div>
     );
   }
@@ -90,12 +90,13 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
   const sinRegion = datos.estado === "infactible";
 
   return (
-    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.4fr_1fr] print:grid-cols-1">
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] print:grid-cols-1">
       <Card className="print:mx-auto print:w-full print:max-w-[14cm]">
         <CardHeader>
           <CardTitle className="text-sm font-semibold text-muted-foreground">Gráfica</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mx-auto w-full max-w-[640px]">
           <Grafica
             resultado={datos}
             modelo={modelo}
@@ -106,6 +107,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
             verticeResaltado={verticeResaltado}
             onCambiarFoco={setVerticeResaltado}
           />
+          </div>
         </CardContent>
       </Card>
 
@@ -119,7 +121,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="slider-nivel-z">Recta de nivel: Z = {nivelZ.toFixed(2)}</Label>
+                <Label htmlFor="slider-nivel-z">Recta de nivel: Z = {nivelZ.toLocaleString("es", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</Label>
                 <Slider
                   id="slider-nivel-z"
                   min={0}
@@ -150,7 +152,7 @@ function ContenidoVistaGrafico({ modelo, formato }: VistaGraficoProps) {
             <CardHeader>
               <CardTitle className="text-sm font-semibold text-muted-foreground">Vértices</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="overflow-x-auto">
               <TablaVertices
                 vertices={datos.vertices}
                 modelo={modelo}

@@ -40,6 +40,7 @@ import {
   calcularSegmentoLinea,
   puntoANumero,
   puntoMedio,
+  redondearMaximoLindo,
 } from "./geometria";
 import { construirResumenAccesible } from "./resumen";
 
@@ -92,7 +93,7 @@ export function Grafica({
     // tarea): el rango en píxeles del eje Y colapsa a casi cero cuando su dominio máximo es
     // menor al del eje X, con instancias de escala fijas en ambos ejes. Un dominio compartido
     // (además de ser lo que pide la especificación) evita ese defecto.
-    const dominioCompartido: [number, number] = [0, Math.max(dominioX1[1], dominioX2[1])];
+    const dominioCompartido: [number, number] = [0, redondearMaximoLindo(Math.max(dominioX1[1], dominioX2[1]))];
     const [variableX1, variableX2] = modelo.variables;
     const c1 = parsearFraccion(modelo.objetivo.coeficientes[0]!).aNumero();
     const c2 = parsearFraccion(modelo.objetivo.coeficientes[1]!).aNumero();
@@ -435,7 +436,7 @@ export function Grafica({
         // arriba) en vez de `dominioX1`/`dominioX2` por separado.
         x: {
           scale: scaleLinear().domain(dominioCompartido),
-          nice: true,
+          nice: false,
           grid: { stroke: "var(--cuadricula)" },
           axis: {
             label: variableX1 ? etiquetaEje(variableX1.nombre, variableX1.etiqueta) : "x1",
@@ -443,7 +444,7 @@ export function Grafica({
         },
         y: {
           scale: scaleLinear().domain(dominioCompartido),
-          nice: true,
+          nice: false,
           grid: { stroke: "var(--cuadricula)" },
           axis: {
             label: variableX2 ? etiquetaEje(variableX2.nombre, variableX2.etiqueta) : "x2",

@@ -12,6 +12,7 @@ import {
   calcularSegmentoLinea,
   puntoANumero,
   puntoMedio,
+  redondearMaximoLindo,
 } from "./geometria";
 
 describe("puntoANumero", () => {
@@ -164,3 +165,16 @@ function verticeDePrueba(id: string, x1: number, x2: number): Vertice {
     esOptimo: false,
   };
 }
+
+describe("redondearMaximoLindo", () => {
+  it("redondea hacia arriba a pasos 1/2/5 × 10^k", () => {
+    expect(redondearMaximoLindo(21)).toBe(25);
+    expect(redondearMaximoLindo(8)).toBe(8);
+    expect(redondearMaximoLindo(100)).toBe(100);
+    expect(redondearMaximoLindo(103)).toBe(120);
+  });
+
+  it("devuelve 1 para valores no positivos", () => {
+    expect(redondearMaximoLindo(0)).toBe(1);
+  });
+});

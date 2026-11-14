@@ -211,7 +211,15 @@ export function TablaSimplexView({
 
   return (
     <div className="overflow-x-auto rounded-lg border border-border">
-      <Table>
+      <Table
+        className="table-fixed"
+        style={{ width: `max(100%, ${5 + 4.5 * (table.getAllLeafColumns().length - 1)}rem)` }}
+      >
+        <colgroup>
+          {table.getAllLeafColumns().map((columna) => (
+            <col key={columna.id} className={columna.id === "base" ? "w-20" : "w-[4.5rem]"} />
+          ))}
+        </colgroup>
         <TableCaption className="px-3 text-left">
           Tabla {posicion} de {total}, iteración {tabla.indice}
           {etiquetaExtra ? ` · ${etiquetaExtra}` : ""}

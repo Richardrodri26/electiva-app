@@ -57,7 +57,7 @@ export interface TablaVerticesProps {
   onResaltar: (id: string | null) => void;
 }
 
-/** "R{n} · {nombre}" para una restricción, o el texto de la no negatividad para los ejes. */
+/** "R{n}" (más el nombre entre paréntesis si es propio) para una restricción, o el texto de la no negatividad para los ejes. */
 function etiquetaRecta(id: IdRecta, modelo: ModeloLineal): string {
   if (id === "eje_x1") {
     return "x1 ≥ 0";
@@ -66,7 +66,10 @@ function etiquetaRecta(id: IdRecta, modelo: ModeloLineal): string {
     return "x2 ≥ 0";
   }
   const restriccion = modelo.restricciones.find((r) => r.numero === id);
-  return restriccion ? `R${id} · ${restriccion.nombre}` : `Restricción ${id}`;
+  if (!restriccion || restriccion.nombre === `Restricción ${id}`) {
+    return `R${id}`;
+  }
+  return `R${id} (${restriccion.nombre})`;
 }
 
 // Features registradas a nivel de módulo (fuera del componente), como pide la guía de la
@@ -115,7 +118,7 @@ export function TablaVertices({ vertices, modelo, formato, verticeResaltado, onR
           enableSorting: false,
           cell: ({ row }) => (
             <span className="text-xs text-muted-foreground">
-              {row.original.restriccionesActivas.map((id) => etiquetaRecta(id, modelo)).join(" · ")}
+              {row.original.restriccionesActivas.map((id) => etiquetaRecta(id, modelo)).join(", ")}
             </span>
           ),
         }),
