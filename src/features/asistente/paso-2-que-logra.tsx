@@ -85,10 +85,16 @@ export function Paso2QueLogra({ valorInicial, etiquetasOpciones, unidad, onConti
         </form.Field>
       </FieldSet>
 
-      <form.Subscribe selector={(state) => state.values.meta}>
-        {(meta) =>
+      <form.Subscribe
+        selector={(state) => ({
+          meta: state.values.meta,
+          // Mismo criterio que `FieldError` del campo `meta`: si ese error se ve, el aviso no se repite.
+          metaConError: (state.fieldMeta.meta?.errors.length ?? 0) > 0,
+        })}
+      >
+        {({ meta, metaConError }) =>
           meta === null ? (
-            <p className="text-sm text-muted-foreground">{AVISO_ELEGIR_META_PRIMERO}</p>
+            metaConError ? null : <p className="text-sm text-muted-foreground">{AVISO_ELEGIR_META_PRIMERO}</p>
           ) : (
             <FieldGroup>
               {etiquetasOpciones.map((etiqueta, indice) => (

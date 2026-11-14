@@ -134,10 +134,15 @@ test.describe("Asistente completo", () => {
     await page.getByRole("button", { name: "Continuar" }).click();
 
     await expect(page).toHaveURL(/paso=2/);
+    // Estado inicial: sin meta y sin error, el aviso guía al usuario.
+    await expect(page.getByText("Primero elija qué desea conseguir.")).toBeVisible();
+
     await page.getByRole("button", { name: "Continuar" }).click();
 
     const grupo = page.getByRole("group", { name: "¿Qué desea conseguir?" });
     await expect(grupo.getByText("Elija qué desea conseguir.")).toBeVisible();
+    // Con el error de campo visible, el aviso no se repite debajo.
+    await expect(page.getByText("Primero elija qué desea conseguir.")).toHaveCount(0);
     await expect(page.getByText("Entrada inválida")).toHaveCount(0);
     await expect(page).toHaveURL(/paso=2/);
   });
