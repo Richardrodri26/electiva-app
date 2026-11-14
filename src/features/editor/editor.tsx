@@ -78,7 +78,7 @@ const SIMBOLOS_RELACION: Record<Relacion, string> = { "<=": "≤", ">=": "≥", 
 /** `gridTemplateColumns` compartido por todas las filas, para que alineen entre sí. */
 function estiloColumnas(cantidadVariables: number): CSSProperties {
   return {
-    gridTemplateColumns: `minmax(4.5rem,auto) repeat(${cantidadVariables}, minmax(4.5rem,1fr)) minmax(5rem,auto) minmax(5.5rem,auto) minmax(8rem,1fr) 2.25rem`,
+    gridTemplateColumns: `4.5rem repeat(${cantidadVariables}, minmax(5rem,1fr)) 5.5rem minmax(6rem,1fr) minmax(8rem,1.25fr) 2.75rem`,
   };
 }
 
@@ -240,7 +240,7 @@ export function Editor({ onResolver, className }: EditorProps) {
         </div>
 
         {/* Grilla: encabezado de variables, fila del objetivo (Z) y una fila por restricción. */}
-        <div className="flex flex-col md:rounded-lg md:border md:border-border">
+        <div className="flex flex-col md:overflow-x-auto md:rounded-lg md:border md:border-border">
           <form.Field name="variables">
             {(variablesField) => (
               <div
@@ -284,6 +284,20 @@ export function Editor({ onResolver, className }: EditorProps) {
                       : `Máximo ${LIMITE_VARIABLES.maximo} variables.`}
                   </TooltipContent>
                 </Tooltip>
+              </div>
+            )}
+          </form.Field>
+
+          {/* Encabezados de las columnas extra (solo escritorio; en móvil cada campo trae su etiqueta). */}
+          <form.Field name="variables">
+            {(variablesField) => (
+              <div
+                className="hidden border-b border-border px-2 py-1 text-xs font-medium text-muted-foreground md:grid md:gap-x-2"
+                style={estiloColumnas(variablesField.state.value.length)}
+              >
+                <span style={{ gridColumn: variablesField.state.value.length + 2 }}>Relación</span>
+                <span className="text-right">Límite</span>
+                <span>Nombre (opcional)</span>
               </div>
             )}
           </form.Field>
@@ -365,7 +379,7 @@ export function Editor({ onResolver, className }: EditorProps) {
                                   <SelectTrigger
                                     size="sm"
                                     aria-label={`Relación de la restricción R${fila + 1}`}
-                                    className="w-full md:w-fit"
+                                    className="w-full md:w-[5.5rem]"
                                   >
                                     <SelectValue>
                                       {(valor: Relacion) => SIMBOLOS_RELACION[valor]}
@@ -401,7 +415,7 @@ export function Editor({ onResolver, className }: EditorProps) {
                               <CeldaExtra etiquetaMovil={`Nombre de R${fila + 1}`}>
                                 <Input
                                   value={campo.state.value}
-                                  placeholder={`Restricción ${fila + 1}`}
+                                  placeholder="Nombre opcional"
                                   aria-label={`Nombre de la restricción R${fila + 1}`}
                                   onChange={(evento) => campo.handleChange(evento.target.value)}
                                   onBlur={campo.handleBlur}
@@ -520,7 +534,7 @@ export function Editor({ onResolver, className }: EditorProps) {
                         <Expresion key={indice} tokens={tokens} />
                       ) : (
                         <span key={indice} className="text-muted-foreground">
-                          R{indice + 1}: completá los números para ver la vista previa.
+                          R{indice + 1}: complete los números para ver la vista previa.
                         </span>
                       );
                     })}
