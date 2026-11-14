@@ -8,6 +8,22 @@ import {
   TIPOS_RESTRICCION,
   UNIDADES,
 } from "@/dominio/modelo/catalogos";
+import {
+  esquemaPasoNaturaleza,
+  esquemaPasoObjetivo,
+  esquemaPasoRestricciones,
+  esquemaPasoVariables,
+  MSG_ELEGIR_CATEGORIA,
+  MSG_ELEGIR_FORMA_CUMPLIMIENTO,
+  MSG_ELEGIR_META,
+  MSG_ELEGIR_NATURALEZA,
+  MSG_ELEGIR_TIPO_LIMITACION,
+  MSG_UNIDAD_VACIA,
+  nombreNoVacio,
+  numeroAsistente,
+} from "@/dominio/modelo/esquemas";
+
+import { crearBorradorAsistente, validarPaso1, validarPaso2, validarPaso3, validarPaso4 } from "./estado";
 
 import {
   BOTON_AGREGAR_LIMITACION,
@@ -104,5 +120,104 @@ describe("asistente — vocabulario sin jerga técnica (pasos 1 a 5)", () => {
     verificarSinJerga(TIPOS_RESTRICCION.map((o) => o.etiqueta));
     verificarSinJerga(FORMAS_CUMPLIMIENTO.map((o) => o.etiqueta));
     verificarSinJerga(OPCIONES_NATURALEZA.map((o) => o.etiqueta));
+  });
+});
+
+/** Textos por defecto de Zod (en español o en inglés) que nunca deben llegar al usuario. */
+const FRAGMENTOS_GENERICOS_DE_ZOD = [
+  "entrada inválida",
+  "opción inválida",
+  "se esperaba",
+  "recibido",
+  "demasiado grande:",
+  "demasiado pequeño:",
+  "invalid input",
+  "invalid option",
+  "required",
+  "expected",
+  "too big",
+  "too small",
+];
+
+function mensajesDe(resultado: { success: boolean; error?: { issues: readonly { message: string }[] } }): string[] {
+  return resultado.success ? [] : resultado.error!.issues.map((issue) => issue.message);
+}
+
+describe("asistente — mensajes de error visibles", () => {
+  const mal = [null, undefined, "", "   ", "abc", 0, 99, {}, []] as const;
+
+  /** Todos los mensajes que producen los esquemas del asistente con entradas faltantes o absurdas. */
+  function recolectarMensajes(): string[] {
+    const todos: string[] = [];
+    const base = crearBorradorAsistente();
+    for (const valor of mal) {
+      todos.push(
+        ...mensajesDe(esquemaPasoVariables.safeParse({ categoria: valor, unidad: valor, nombresOpciones: valor })),
+        ...mensajesDe(esquemaPasoVariables.safeParse({ categoria: 1, unidad: "x", nombresOpciones: [valor, valor] })),
+        ...mensajesDe(esquemaPasoObjetivo.safeParse({ meta: valor, coeficientes: valor })),
+        ...mensajesDe(esquemaPasoObjetivo.safeParse({ meta: 1, coeficientes: [valor, valor] })),
+        ...mensajesDe(esquemaPasoRestricciones.safeParse({ restricciones: valor })),
+        ...mensajesDe(
+          esquemaPasoRestricciones.safeParse({
+            restricciones: [{ tipo: valor, nombrePersonalizado: valor, coeficientes: valor, limite: valor, formaCumplimiento: valor }],
+          }),
+        ),
+        ...mensajesDe(
+          esquemaPasoRestricciones.safeParse({
+            restricciones: [{ tipo: 8, nombrePersonalizado: valor, coeficientes: [valor, valor], limite: valor, formaCumplimiento: 1 }],
+          }),
+        ),
+        ...mensajesDe(esquemaPasoNaturaleza.safeParse({ naturaleza: valor })),
+        ...mensajesDe(numeroAsistente.safeParse(valor)),
+        ...mensajesDe(nombreNoVacio.safeParse(valor)),
+      );
+    }
+    todos.push(
+      ...mensajesDe(esquemaPasoVariables.safeParse({ categoria: 1, unidad: "x", nombresOpciones: ["a".repeat(41), "b"] })),
+      ...mensajesDe(esquemaPasoVariables.safeParse({ categoria: 1, unidad: "x", nombresOpciones: ["a"] })),
+      ...mensajesDe(esquemaPasoVariables.safeParse({ categoria: 1, unidad: "x", nombresOpciones: Array(7).fill("a") })),
+      ...mensajesDe(esquemaPasoRestricciones.safeParse({ restricciones: [] })),
+      ...mensajesDe(validarPaso1(base.paso1)),
+      ...mensajesDe(validarPaso2(base.paso2)),
+      ...mensajesDe(validarPaso3(base.paso3)),
+      ...mensajesDe(validarPaso4(base.paso4)),
+    );
+    return todos;
+  }
+
+  it("categoría, meta, tipo, forma y naturaleza sin elegir dicen qué hacer", () => {
+    const base = crearBorradorAsistente();
+    expect(mensajesDe(validarPaso1(base.paso1))).toContain(MSG_ELEGIR_CATEGORIA);
+    expect(mensajesDe(validarPaso2(base.paso2))).toContain(MSG_ELEGIR_META);
+    expect(mensajesDe(esquemaPasoNaturaleza.safeParse({ naturaleza: undefined }))).toEqual([MSG_ELEGIR_NATURALEZA]);
+    expect(
+      mensajesDe(
+        esquemaPasoRestricciones.safeParse({
+          restricciones: [{ tipo: null, coeficientes: ["1", "1"], limite: "1", formaCumplimiento: null }],
+        }),
+      ),
+    ).toEqual([MSG_ELEGIR_TIPO_LIMITACION, MSG_ELEGIR_FORMA_CUMPLIMIENTO]);
+    expect(MSG_ELEGIR_CATEGORIA).toBe("Elija qué desea determinar.");
+    expect(MSG_ELEGIR_META).toBe("Elija qué desea conseguir.");
+  });
+
+  it("la unidad vacía pide la unidad de medida", () => {
+    const resultado = esquemaPasoVariables.safeParse({ categoria: 1, unidad: "", nombresOpciones: ["a", "b"] });
+    expect(mensajesDe(resultado)).toEqual([MSG_UNIDAD_VACIA]);
+  });
+
+  it("ningún mensaje es un texto genérico de Zod", () => {
+    const mensajes = recolectarMensajes();
+    expect(mensajes.length).toBeGreaterThan(10);
+    for (const mensaje of mensajes) {
+      const normalizado = normalizar(mensaje);
+      for (const generico of FRAGMENTOS_GENERICOS_DE_ZOD) {
+        expect(normalizado.includes(generico), `"${mensaje}" contiene el texto genérico "${generico}"`).toBe(false);
+      }
+    }
+  });
+
+  it("ningún mensaje usa jerga técnica", () => {
+    verificarSinJerga(recolectarMensajes());
   });
 });

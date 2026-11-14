@@ -17,7 +17,7 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 
 import { CATEGORIAS, UNIDADES, VALOR_UNIDAD_OTRA } from "@/dominio/modelo/catalogos";
-import { nombreNoVacio } from "@/dominio/modelo/esquemas";
+import { nombreNoVacio, unidadNoVacia } from "@/dominio/modelo/esquemas";
 import type { CategoriaId } from "@/dominio/modelo/tipos";
 
 import { Button } from "@/components/ui/button";
@@ -212,7 +212,7 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
         <form.Subscribe selector={(state) => state.values.unidadId}>
           {(unidadId) =>
             unidadId === VALOR_UNIDAD_OTRA ? (
-              <form.Field name="unidadOtra" validators={{ onBlur: nombreNoVacio }}>
+              <form.Field name="unidadOtra" validators={{ onBlur: unidadNoVacia }}>
                 {(campo) => (
                   <Field>
                     <Label htmlFor="unidad-otra">{ETIQUETA_UNIDAD_OTRA}</Label>

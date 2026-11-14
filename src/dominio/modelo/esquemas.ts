@@ -18,14 +18,37 @@ import { Fraccion } from "../aritmetica/fraccion";
 import { parsearFraccion } from "../aritmetica/parseo";
 import type { CategoriaId, MetaId, Naturaleza, NumeroTexto, Relacion, Sentido } from "./tipos";
 
+// ---------------------------------------------------------------------------
+// 0. Mensajes de "campo sin elegir"
+// ---------------------------------------------------------------------------
+//
+// Con `z.config(z.locales.es())` un valor ausente o fuera del catálogo cae en el mensaje
+// por defecto de Zod ("Entrada inválida", "Opción inválida: se esperaba una de …"), que no
+// dice qué hacer. Cada esquema que recibe una elección define el suyo con el parámetro
+// `error` de Zod 4. Los del asistente no usan jerga técnica (AGENTS.md regla de oro #5);
+// los del editor técnico sí pueden (docs/06).
+
+export const MSG_ELEGIR_CATEGORIA = "Elija qué desea determinar.";
+export const MSG_ELEGIR_META = "Elija qué desea conseguir.";
+export const MSG_ELEGIR_TIPO_LIMITACION = "Elija qué tipo de limitación desea agregar.";
+export const MSG_ELEGIR_FORMA_CUMPLIMIENTO = "Elija cómo debe cumplirse esta limitación.";
+export const MSG_ELEGIR_NATURALEZA = "Elija si las cantidades deben ser enteras o pueden ser fraccionarias.";
+export const MSG_ELEGIR_SENTIDO = "Elija si desea maximizar o minimizar.";
+export const MSG_ELEGIR_RELACION = "Elija una relación: ≤, ≥ o =.";
+export const MSG_LISTA_INCOMPLETA = "Complete todos los datos antes de continuar.";
+
 /** `Sentido` como esquema reutilizable (editor y modelo final). */
-const esquemaSentido: z.ZodType<Sentido> = z.enum(["max", "min"] as const);
+const esquemaSentido: z.ZodType<Sentido> = z.enum(["max", "min"] as const, { error: MSG_ELEGIR_SENTIDO });
 
 /** `Relacion` como esquema reutilizable (editor y modelo final). */
-const esquemaRelacion: z.ZodType<Relacion> = z.enum(["<=", ">=", "="] as const);
+const esquemaRelacion: z.ZodType<Relacion> = z.enum(["<=", ">=", "="] as const, {
+  error: MSG_ELEGIR_RELACION,
+});
 
 /** `Naturaleza` como esquema reutilizable (asistente, editor y modelo final). */
-const esquemaNaturaleza: z.ZodType<Naturaleza> = z.enum(["entera", "fraccionaria"] as const);
+const esquemaNaturaleza: z.ZodType<Naturaleza> = z.enum(["entera", "fraccionaria"] as const, {
+  error: MSG_ELEGIR_NATURALEZA,
+});
 
 /**
  * Mensajes en español para todo lo que Zod no sobrescribe explícitamente (ver docs/03 §3,
@@ -89,7 +112,7 @@ function normalizarTextoDecimal(texto: string): NumeroTexto {
  * `analizarNumero` + `preguntarNumero` del CLI (docs/03 §3.1):
  * 1. vacío · 2. negativo · 3. separador de miles · 4. formato inválido · 5. demasiado grande.
  */
-export const numeroAsistente = z.string().transform((entrada, ctx): NumeroTexto => {
+export const numeroAsistente = z.string({ error: MSG_NUMERO_FORMATO_INVALIDO }).transform((entrada, ctx): NumeroTexto => {
   const texto = entrada.trim();
 
   if (texto === "") {
@@ -157,7 +180,7 @@ function normalizarTextoFraccion(signo: string, numeradorTexto: string, denomina
  * docs/03 §3.1 no da un mensaje separado para "demasiado grande" en el editor (a diferencia
  * del asistente, que tiene 5 motivos distintos): se reutiliza el único mensaje documentado.
  */
-export const numeroEditor = z.string().transform((entrada, ctx): NumeroTexto => {
+export const numeroEditor = z.string({ error: MSG_NUMERO_EDITOR_INVALIDO }).transform((entrada, ctx): NumeroTexto => {
   const texto = entrada.trim();
 
   const comoFraccion = PATRON_FRACCION_EDITOR.exec(texto);
@@ -193,8 +216,20 @@ export const numeroEditor = z.string().transform((entrada, ctx): NumeroTexto => 
 
 export const MSG_NOMBRE_VACIO = "Por favor ingrese un nombre (no puede quedar vacío).";
 
+export const MSG_NOMBRE_LARGO = "Use como máximo 40 caracteres.";
+export const MSG_DEFINICION_LARGA = "Use como máximo 200 caracteres.";
+export const MSG_UNIDAD_VACIA = "Escriba la unidad de medida.";
+
+/** Texto obligatorio, sin espacios sobrantes y con tope de longitud (mensajes propios, en español). */
+function textoObligatorio(maximo: number, mensajeVacio: string, mensajeLargo: string) {
+  return z.string({ error: mensajeVacio }).trim().min(1, mensajeVacio).max(maximo, mensajeLargo);
+}
+
 /** docs/03 §3.2: `trim().min(1, "...").max(40)`. */
-export const nombreNoVacio = z.string().trim().min(1, MSG_NOMBRE_VACIO).max(40);
+export const nombreNoVacio = textoObligatorio(40, MSG_NOMBRE_VACIO, MSG_NOMBRE_LARGO);
+
+/** Unidad de medida (paso 1 del asistente): igual que un nombre, pero con su propio texto. */
+export const unidadNoVacia = textoObligatorio(40, MSG_UNIDAD_VACIA, MSG_NOMBRE_LARGO);
 
 export const MSG_ETIQUETA_DUPLICADA = "Ya existe una opción con ese nombre.";
 
@@ -240,6 +275,9 @@ export const LIMITE_RESTRICCIONES = { minimo: 1, maximo: 6 } as const;
 
 export const MSG_RANGO_VARIABLES = "Debe haber entre 2 y 6 variables.";
 export const MSG_RANGO_RESTRICCIONES = "Debe haber entre 1 y 6 restricciones.";
+/** Mismos rangos, sin jerga técnica, para lo que el usuario ve en el asistente. */
+export const MSG_RANGO_OPCIONES = "Debe haber entre 2 y 6 opciones.";
+export const MSG_RANGO_LIMITACIONES = "Debe haber entre 1 y 6 limitaciones.";
 export const MSG_ERROR_INTERNO_CANTIDAD_APORTES =
   "Error interno: la cantidad de aportes no coincide con la cantidad de variables.";
 
@@ -275,21 +313,17 @@ function todosLosAportesSonCero(coeficientes: readonly string[]): boolean {
 // 6. Asistente paso a paso
 // ---------------------------------------------------------------------------
 
-const idCategoria: z.ZodType<CategoriaId> = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-]);
-const idMeta: z.ZodType<MetaId> = z.union([
-  z.literal(1),
-  z.literal(2),
-  z.literal(3),
-  z.literal(4),
-  z.literal(5),
-  z.literal(6),
-]);
-const idFormaCumplimiento = z.union([z.literal(1), z.literal(2), z.literal(3)]);
+const idCategoria: z.ZodType<CategoriaId> = z.union(
+  [z.literal(1), z.literal(2), z.literal(3), z.literal(4)],
+  { error: MSG_ELEGIR_CATEGORIA },
+);
+const idMeta: z.ZodType<MetaId> = z.union(
+  [z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5), z.literal(6)],
+  { error: MSG_ELEGIR_META },
+);
+const idFormaCumplimiento = z.union([z.literal(1), z.literal(2), z.literal(3)], {
+  error: MSG_ELEGIR_FORMA_CUMPLIMIENTO,
+});
 
 /**
  * Paso 1 — console-program/src/flow/definirVariables.ts: categoría, unidad (ya resuelta si
@@ -298,11 +332,11 @@ const idFormaCumplimiento = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 export const esquemaPasoVariables = z
   .object({
     categoria: idCategoria,
-    unidad: nombreNoVacio,
+    unidad: unidadNoVacia,
     nombresOpciones: z
-      .array(nombreNoVacio)
-      .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
-      .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
+      .array(nombreNoVacio, { error: MSG_LISTA_INCOMPLETA })
+      .min(LIMITE_VARIABLES.minimo, MSG_RANGO_OPCIONES)
+      .max(LIMITE_VARIABLES.maximo, MSG_RANGO_OPCIONES),
   })
   .superRefine((valor, ctx) => {
     verificarEtiquetasUnicas(valor.nombresOpciones, ctx, (indice) => ["nombresOpciones", indice]);
@@ -315,9 +349,9 @@ export const esquemaPasoVariables = z
 export const esquemaPasoObjetivo = z.object({
   meta: idMeta,
   coeficientes: z
-    .array(numeroAsistente)
-    .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
-    .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
+    .array(numeroAsistente, { error: MSG_LISTA_INCOMPLETA })
+    .min(LIMITE_VARIABLES.minimo, MSG_RANGO_OPCIONES)
+    .max(LIMITE_VARIABLES.maximo, MSG_RANGO_OPCIONES),
 });
 
 const MSG_TIPO_RESTRICCION_PERSONALIZADO = "Escriba el nombre de esta limitación.";
@@ -325,22 +359,25 @@ const MSG_TIPO_RESTRICCION_PERSONALIZADO = "Escriba el nombre de esta limitació
 /** Una limitación del paso 3 — console-program/src/flow/definirRestricciones.ts. */
 const esquemaRestriccionAsistente = z
   .object({
-    tipo: z.union([
-      z.literal(1),
-      z.literal(2),
-      z.literal(3),
-      z.literal(4),
-      z.literal(5),
-      z.literal(6),
-      z.literal(7),
-      z.literal(8),
-    ]),
+    tipo: z.union(
+      [
+        z.literal(1),
+        z.literal(2),
+        z.literal(3),
+        z.literal(4),
+        z.literal(5),
+        z.literal(6),
+        z.literal(7),
+        z.literal(8),
+      ],
+      { error: MSG_ELEGIR_TIPO_LIMITACION },
+    ),
     /** Solo se usa (y se exige) cuando `tipo === 8` ("Otra"). */
     nombrePersonalizado: nombreNoVacio.optional(),
     coeficientes: z
-      .array(numeroAsistente)
-      .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
-      .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
+      .array(numeroAsistente, { error: MSG_LISTA_INCOMPLETA })
+      .min(LIMITE_VARIABLES.minimo, MSG_RANGO_OPCIONES)
+      .max(LIMITE_VARIABLES.maximo, MSG_RANGO_OPCIONES),
     limite: numeroAsistente,
     formaCumplimiento: idFormaCumplimiento,
   })
@@ -358,9 +395,9 @@ const esquemaRestriccionAsistente = z
 export const esquemaPasoRestricciones = z
   .object({
     restricciones: z
-      .array(esquemaRestriccionAsistente)
-      .min(LIMITE_RESTRICCIONES.minimo, MSG_RANGO_RESTRICCIONES)
-      .max(LIMITE_RESTRICCIONES.maximo, MSG_RANGO_RESTRICCIONES),
+      .array(esquemaRestriccionAsistente, { error: MSG_LISTA_INCOMPLETA })
+      .min(LIMITE_RESTRICCIONES.minimo, MSG_RANGO_LIMITACIONES)
+      .max(LIMITE_RESTRICCIONES.maximo, MSG_RANGO_LIMITACIONES),
   })
   .superRefine((valor, ctx) => {
     valor.restricciones.forEach((restriccion, indice) => {
@@ -385,13 +422,13 @@ export const esquemaPasoNaturaleza = z.object({
 
 const esquemaVariableEditor = z.object({
   etiqueta: nombreNoVacio,
-  definicion: nombreNoVacio.max(200),
+  definicion: textoObligatorio(200, MSG_NOMBRE_VACIO, MSG_DEFINICION_LARGA),
 });
 
 const esquemaRestriccionEditor = z.object({
   nombre: nombreNoVacio,
   coeficientes: z
-    .array(numeroEditor)
+    .array(numeroEditor, { error: MSG_LISTA_INCOMPLETA })
     .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
     .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
   relacion: esquemaRelacion,
@@ -407,16 +444,16 @@ const esquemaRestriccionEditor = z.object({
 export const esquemaEditor = z
   .object({
     variables: z
-      .array(esquemaVariableEditor)
+      .array(esquemaVariableEditor, { error: MSG_LISTA_INCOMPLETA })
       .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
       .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
     sentido: esquemaSentido,
     coeficientesObjetivo: z
-      .array(numeroEditor)
+      .array(numeroEditor, { error: MSG_LISTA_INCOMPLETA })
       .min(LIMITE_VARIABLES.minimo, MSG_RANGO_VARIABLES)
       .max(LIMITE_VARIABLES.maximo, MSG_RANGO_VARIABLES),
     restricciones: z
-      .array(esquemaRestriccionEditor)
+      .array(esquemaRestriccionEditor, { error: MSG_LISTA_INCOMPLETA })
       .min(LIMITE_RESTRICCIONES.minimo, MSG_RANGO_RESTRICCIONES)
       .max(LIMITE_RESTRICCIONES.maximo, MSG_RANGO_RESTRICCIONES),
     naturaleza: esquemaNaturaleza,
@@ -451,14 +488,14 @@ const esquemaVariableModelo = z.object({
 const esquemaObjetivoModelo = z.object({
   sentido: esquemaSentido,
   meta: idMeta.optional(),
-  coeficientes: z.array(numeroEditor),
+  coeficientes: z.array(numeroEditor, { error: MSG_LISTA_INCOMPLETA }),
   simbolo: z.literal("Z"),
 });
 
 const esquemaRestriccionModelo = z.object({
   numero: z.number().int().positive(),
   nombre: nombreNoVacio,
-  coeficientes: z.array(numeroEditor),
+  coeficientes: z.array(numeroEditor, { error: MSG_LISTA_INCOMPLETA }),
   relacion: esquemaRelacion,
   limite: numeroEditor,
 });

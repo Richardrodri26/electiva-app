@@ -111,4 +111,34 @@ test.describe("Asistente completo", () => {
 
     await expect(page).toHaveURL("/");
   });
+
+  test("Continuar sin elegir qué determinar muestra un mensaje claro junto a la pregunta", async ({ page }) => {
+    await page.goto("/modelo/asistente");
+
+    await page.getByLabel("¿Cómo desea llamar a la opción 1?").fill("Mesas");
+    await page.getByLabel("¿Cómo desea llamar a la opción 2?").fill("Sillas");
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    const grupo = page.getByRole("group", { name: "¿Qué desea determinar?" });
+    await expect(grupo.getByText("Elija qué desea determinar.")).toBeVisible();
+    await expect(page.getByText("Entrada inválida")).toHaveCount(0);
+    await expect(page).not.toHaveURL(/paso=2/);
+  });
+
+  test("Continuar sin elegir qué conseguir muestra un mensaje claro junto a la pregunta", async ({ page }) => {
+    await page.goto("/modelo/asistente");
+
+    await page.getByRole("radio", { name: "Productos" }).click();
+    await page.getByLabel("¿Cómo desea llamar a la opción 1?").fill("Mesas");
+    await page.getByLabel("¿Cómo desea llamar a la opción 2?").fill("Sillas");
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    await expect(page).toHaveURL(/paso=2/);
+    await page.getByRole("button", { name: "Continuar" }).click();
+
+    const grupo = page.getByRole("group", { name: "¿Qué desea conseguir?" });
+    await expect(grupo.getByText("Elija qué desea conseguir.")).toBeVisible();
+    await expect(page.getByText("Entrada inválida")).toHaveCount(0);
+    await expect(page).toHaveURL(/paso=2/);
+  });
 });

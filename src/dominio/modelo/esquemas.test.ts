@@ -8,6 +8,7 @@ import {
   MSG_NUMERO_NEGATIVO,
   MSG_NUMERO_SEPARADOR_MILES,
   MSG_OBJETIVO_TODO_CERO,
+  MSG_RANGO_LIMITACIONES,
   MSG_RANGO_RESTRICCIONES,
   MSG_RANGO_VARIABLES,
   advertenciaObjetivoEnCero,
@@ -206,7 +207,7 @@ describe("esquemaPasoRestricciones — decisión confirmada: 1 a 6 limitaciones"
     expect(esquemaPasoRestricciones.safeParse({ restricciones: seis }).success).toBe(true);
     const resultadoSiete = esquemaPasoRestricciones.safeParse({ restricciones: siete });
     expect(resultadoSiete.success).toBe(false);
-    expect(primerMensaje(resultadoSiete)).toBe(MSG_RANGO_RESTRICCIONES);
+    expect(primerMensaje(resultadoSiete)).toBe(MSG_RANGO_LIMITACIONES);
   });
 
   it("bloquea una limitación sin ninguna opción, con el mensaje SIN jerga técnica", () => {

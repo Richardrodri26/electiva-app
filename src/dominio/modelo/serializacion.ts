@@ -73,6 +73,8 @@ export const LIMITE_LONGITUD_SERIALIZADO = 6000;
  * Resultado de un parseo que puede fallar sin lanzar excepción (docs/03 §5): `ok: true`
  * con el valor ya validado, o `ok: false` con un mensaje de error en español.
  */
+export const MSG_ENLACE_SIN_MODELO = "Este enlace no contiene un modelo válido.";
+
 export type ResultadoParseo<T> = { ok: true; valor: T } | { ok: false; error: string };
 
 // ---------------------------------------------------------------------------
@@ -276,8 +278,9 @@ export function deserializarModelo(valor: string): ResultadoParseo<ModeloLineal>
 
   const resultado = esquemaModelo.safeParse(candidato);
   if (!resultado.success) {
-    const mensaje = resultado.error.issues[0]?.message ?? "El modelo del enlace no es válido.";
-    return { ok: false, error: mensaje };
+    // Los detalles de Zod ("se esperaba 1", rutas internas) no le sirven a quien abre un
+    // enlace: se devuelve un único mensaje amable (docs/06 §4, "URL inválida").
+    return { ok: false, error: MSG_ENLACE_SIN_MODELO };
   }
   return { ok: true, valor: resultado.data };
 }
