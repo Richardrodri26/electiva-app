@@ -42,6 +42,7 @@ import {
   BOTON_RESOLVER_MODELO,
   BOTON_VOLVER_DIALOGO,
   DESCRIPCION_DIALOGO_CANCELAR,
+  INTRODUCCION_RESUMEN,
   OPCION_CORREGIR_LIMITACIONES,
   OPCION_CORREGIR_NATURALEZA,
   OPCION_CORREGIR_OBJETIVO,
@@ -96,7 +97,8 @@ export function Paso5Revisar({
   return (
     <div className="flex flex-col gap-6">
       <Card>
-        <CardContent>
+        <CardContent className="flex flex-col gap-3">
+          <p className="text-sm text-muted-foreground">{INTRODUCCION_RESUMEN}</p>
           <pre className="overflow-x-auto whitespace-pre-wrap text-sm" aria-label="Resumen del modelo">
             {formatearResumenTexto(modelo)}
           </pre>

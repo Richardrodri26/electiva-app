@@ -110,10 +110,28 @@ Encabezado global: nombre de la app (enlace a Inicio) · botón Historial (abre 
 
 - El stepper sí es una secuencia: numerar está justificado. Paso actual en `?paso=`; no se puede saltar a
   un paso posterior con datos inválidos (se valida el paso actual al continuar).
-- Preguntas, opciones y orden **idénticos al CLI** (`flow/*.ts`), con estos ajustes de formulario:
+- Preguntas, opciones y orden **parten del CLI** (`flow/*.ts`), pero los textos **ya no son idénticos** en los
+  puntos de abajo: el usuario aprobó apartarse del CLI para facilitar la comprensión a una persona no técnica
+  (la implementación vive en `features/asistente/textos.ts`). Cambios:
+  - Paso 2: la pregunta del aporte depende de la meta (*"¿Cuánta ganancia deja cada unidad de «Mesas»?"*,
+    ingreso, solicitudes, costo, tiempo, recursos) y de la unidad del paso 1 (*"cada hora de «Soporte»"*; sin
+    forma singular confiable → "unidad"). Sin meta elegida solo se ve *"Primero elija qué desea conseguir."*
+  - Siempre *"cada unidad de «{nombre}»"* con comillas «» (evita "cada Mesas").
+  - Paso 3: la forma de cumplimiento va **antes** del límite y la pregunta del límite se adapta a ella
+    (*"¿Cuánto hay disponible como máximo de «Horas»?"*, *"…se necesita como mínimo…"*, *"…debe ser exactamente…"*);
+    el aporte pregunta *"¿Cuánto de «Horas» usa cada unidad de «Mesas»?"* con ayuda *"Si no usa nada, escriba 0."*
+    (para "Cantidad máxima"/"Cantidad total": *"Escriba 1 si esta opción cuenta para el total y 0 si no."*).
+    Al elegir "Cantidad máxima", "Pedido mínimo" o "Cantidad total" se preselecciona la forma
+    (No se puede superar / Como mínimo / Exactamente); el usuario puede cambiarla.
+  - Paso 1: una sola pregunta *"¿Cuántas opciones desea comparar?"* con ejemplo; placeholders de nombre según la
+    categoría; ayuda bajo la unidad. Paso 4: ejemplo de enteras vs. fraccionarias. Paso 5: línea previa al resumen.
+  - Errores: al continuar, cada problema se muestra junto al campo que falla (`validators.onSubmit` de
+    TanStack Form con `repartirProblemas`); al pie solo quedan los que no son de un campo.
+  - Banner de borrador: botón *"Retomar el modelo"* (evita dos "Continuar"). Stepper en `lg:` con nombres cortos.
+  Ajustes de formulario:
   - Menús de pocas opciones → `RadioGroup` en tarjetas seleccionables; cantidades → `Select`.
   - "Otra" (unidad o tipo de limitación) muestra un `Input` de texto en línea.
-  - Paso 2: tras elegir la meta, una fila por opción: *"¿Cuánto aporta o cuesta cada Mesa?"*
+  - Paso 2: tras elegir la meta, una fila por opción (texto según la meta, ver arriba)
   - Paso 3: cada limitación es un bloque plegable (`Collapsible`/acordeón) con título "Limitación 1 · Horas";
     botón "Agregar limitación" (2 a 6).
 - Paso 5 "Revisar": muestra el resumen (formato del CLI, ya en notación matemática) y tres acciones:
@@ -121,8 +139,8 @@ Encabezado global: nombre de la app (enlace a Inicio) · botón Historial (abre 
   **"Cancelar"** (diálogo de confirmación; borra el borrador).
   - Corregir "Las opciones que se están comparando" muestra el aviso del CLI y lleva al paso 1 marcando
     pasos 2 y 3 como pendientes.
-- El borrador persiste en `localStorage`; al volver: banner *"Tienes un modelo sin terminar"* con
-  [Continuar] [Descartar].
+- El borrador persiste en `localStorage`; al volver: banner *"Tiene un modelo sin terminar"* con
+  [Retomar el modelo] [Descartar].
 - Lenguaje: **sin** "coeficiente", "restricción", "función objetivo", "variable", "maximizar".
 
 ### 3.3 Editor directo

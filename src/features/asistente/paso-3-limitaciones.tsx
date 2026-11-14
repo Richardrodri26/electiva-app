@@ -5,20 +5,32 @@
  * de un `Accordion` titulado "Limitación n · {Nombre}" (docs/06-ux-ui.md §3.2), agregadas
  * con el botón "Agregar limitación" (decisión confirmada para la tarea T5.1: SIN preguntar
  * la cantidad de antemano). Cada limitación pide: tipo (catálogo, con "Otra" en línea),
- * cuánto aporta/consume cada opción, el límite y la forma de cumplimiento.
+ * cuánto usa cada opción, la forma de cumplimiento y el límite (cuya pregunta se adapta a
+ * la forma elegida; al elegir ciertos tipos se sugiere la forma, ver `formaSugeridaParaTipo`).
  */
 
 "use client";
 
 import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
+import { TrashIcon } from "lucide-react";
 
 import { FORMAS_CUMPLIMIENTO, TIPOS_RESTRICCION, VALOR_TIPO_RESTRICCION_OTRA } from "@/dominio/modelo/catalogos";
 import { nombreNoVacio, numeroAsistente } from "@/dominio/modelo/esquemas";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+  FieldTitle,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -27,6 +39,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   CANTIDAD_RESTRICCIONES_MAXIMA,
   crearRestriccionVacia,
+  formaSugeridaParaTipo,
+  repartirProblemas,
   resolverNombreRestriccion,
   validarPaso3,
   type BorradorPaso3,
@@ -35,35 +49,67 @@ import {
   BOTON_AGREGAR_LIMITACION,
   BOTON_ATRAS,
   BOTON_CONTINUAR,
-  BOTON_QUITAR_LIMITACION,
+  DESCRIPCION_APORTE_LIMITACION,
+  DESCRIPCION_APORTE_LIMITACION_TOTAL,
   ETIQUETA_TIPO_LIMITACION_OTRA,
   PREGUNTA_FORMA_CUMPLIMIENTO,
   PREGUNTA_TIPO_LIMITACION,
+  botonQuitarLimitacion,
   preguntaAporteLimitacion,
   preguntaLimiteLimitacion,
   tituloLimitacion,
 } from "./textos";
 
+/** Tipos de limitación (ids de `TIPOS_RESTRICCION`) cuyo aporte es 1 o 0: "Cantidad máxima" y "Cantidad total". */
+const TIPOS_CON_APORTE_SI_O_NO: readonly number[] = [5, 7];
+
+const PATRON_INDICE_LIMITACION = /^restricciones\[(\d+)\]/;
+
 export interface Paso3LimitacionesProps {
   valorInicial: BorradorPaso3;
   /** Etiquetas de las opciones (paso 1), en el mismo orden que cada `coeficientes`. */
   etiquetasOpciones: string[];
+  /** Unidad elegida en el paso 1 (texto final), para adaptar la pregunta ("cada hora de…"). */
+  unidad: string;
   onContinuar: (borrador: BorradorPaso3) => void;
   onAtras: () => void;
 }
 
-export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar, onAtras }: Paso3LimitacionesProps) {
+export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, unidad, onContinuar, onAtras }: Paso3LimitacionesProps) {
   const [erroresPaso, setErroresPaso] = useState<string[]>([]);
+  // Limitaciones desplegadas (valores = índices como texto). Controlado para abrir la
+  // recién agregada y las que tienen errores al intentar continuar.
+  const [abiertas, setAbiertas] = useState<string[]>(["0"]);
   const cantidadOpciones = etiquetasOpciones.length;
 
   const form = useForm({
     defaultValues: valorInicial,
+    validators: {
+      // Cada problema va al campo que falla; al pie solo quedan los que no son de un campo.
+      onSubmit: ({ value }) => {
+        const resultado = validarPaso3(value);
+        if (resultado.success) return undefined;
+        const nombres = new Set<string>();
+        value.restricciones.forEach((restriccion, i) => {
+          nombres.add(`restricciones[${i}].nombrePersonalizado`);
+          nombres.add(`restricciones[${i}].limite`);
+          restriccion.coeficientes.forEach((_, j) => nombres.add(`restricciones[${i}].coeficientes[${j}]`));
+        });
+        const { campos, generales } = repartirProblemas(resultado.error.issues, nombres, (ruta) =>
+          // "Ninguna opción interviene": error de toda la lista, se muestra en el primer aporte.
+          ruta.length === 3 && ruta[0] === "restricciones" && ruta[2] === "coeficientes"
+            ? `restricciones[${String(ruta[1])}].coeficientes[0]`
+            : undefined,
+        );
+        setErroresPaso(generales);
+        const conError = Object.keys(campos)
+          .map((nombre) => PATRON_INDICE_LIMITACION.exec(nombre)?.[1])
+          .filter((indice): indice is string => indice !== undefined);
+        setAbiertas((previas) => [...new Set([...previas, ...conError])]);
+        return { fields: campos };
+      },
+    },
     onSubmit: async ({ value }) => {
-      const resultado = validarPaso3(value);
-      if (!resultado.success) {
-        setErroresPaso([...new Set(resultado.error.issues.map((issue) => issue.message))]);
-        return;
-      }
       setErroresPaso([]);
       onContinuar(value);
     },
@@ -82,7 +128,7 @@ export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar
       <form.Field name="restricciones">
         {(limitaciones) => (
           <>
-            <Accordion defaultValue={["0"]}>
+            <Accordion value={abiertas} onValueChange={(valor) => setAbiertas(valor.map(String))}>
               {limitaciones.state.value.map((restriccion, indice) => (
                 <AccordionItem key={indice} value={String(indice)}>
                   <AccordionTrigger>
@@ -95,8 +141,18 @@ export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar
                         <form.Field name={`restricciones[${indice}].tipo`}>
                           {(campoTipo) => (
                             <>
-                              <Select value={campoTipo.state.value} onValueChange={(v) => v !== null && campoTipo.handleChange(v)}>
-                                <SelectTrigger aria-label={PREGUNTA_TIPO_LIMITACION}>
+                              <Select
+                                value={campoTipo.state.value}
+                                onValueChange={(v) => {
+                                  if (v === null) return;
+                                  campoTipo.handleChange(v);
+                                  const forma = formaSugeridaParaTipo(v);
+                                  if (forma !== null) {
+                                    form.setFieldValue(`restricciones[${indice}].formaCumplimiento`, forma);
+                                  }
+                                }}
+                              >
+                                <SelectTrigger aria-label={PREGUNTA_TIPO_LIMITACION} className="w-full sm:w-72">
                                   <SelectValue>
                                     {(valor: number) => TIPOS_RESTRICCION.find((opcion) => opcion.valor === valor)?.etiqueta ?? ""}
                                   </SelectValue>
@@ -137,59 +193,55 @@ export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar
                       </FieldSet>
 
                       <form.Subscribe
-                        selector={(state) => resolverNombreRestriccion(state.values.restricciones[indice]!)}
+                        selector={(state) => {
+                          const actual = state.values.restricciones[indice]!;
+                          return `${actual.tipo}|${resolverNombreRestriccion(actual)}`;
+                        }}
                       >
-                        {(nombreLimitacion) => (
-                          <FieldGroup>
-                            {Array.from({ length: cantidadOpciones }, (_, iOpcion) => iOpcion).map((iOpcion) => (
-                              <form.Field
-                                key={iOpcion}
-                                name={`restricciones[${indice}].coeficientes[${iOpcion}]`}
-                                validators={{ onBlur: numeroAsistente }}
-                              >
-                                {(campoAporte) => (
-                                  <Field orientation="responsive">
-                                    <FieldLabel htmlFor={`limitacion-${indice}-aporte-${iOpcion}`}>
-                                      {preguntaAporteLimitacion(etiquetasOpciones[iOpcion] ?? "", nombreLimitacion)}
-                                    </FieldLabel>
-                                    <FieldContent>
-                                      <Input
-                                        id={`limitacion-${indice}-aporte-${iOpcion}`}
-                                        inputMode="decimal"
-                                        value={campoAporte.state.value}
-                                        onChange={(e) => campoAporte.handleChange(e.target.value)}
-                                        onBlur={campoAporte.handleBlur}
-                                        aria-invalid={campoAporte.state.meta.errors.length > 0}
-                                      />
-                                      <FieldError errors={campoAporte.state.meta.errors} />
-                                    </FieldContent>
-                                  </Field>
-                                )}
-                              </form.Field>
-                            ))}
-
-                            <form.Field name={`restricciones[${indice}].limite`} validators={{ onBlur: numeroAsistente }}>
-                              {(campoLimite) => (
-                                <Field orientation="responsive">
-                                  <FieldLabel htmlFor={`limitacion-${indice}-limite`}>
-                                    {preguntaLimiteLimitacion(nombreLimitacion)}
-                                  </FieldLabel>
-                                  <FieldContent>
-                                    <Input
-                                      id={`limitacion-${indice}-limite`}
-                                      inputMode="decimal"
-                                      value={campoLimite.state.value}
-                                      onChange={(e) => campoLimite.handleChange(e.target.value)}
-                                      onBlur={campoLimite.handleBlur}
-                                      aria-invalid={campoLimite.state.meta.errors.length > 0}
-                                    />
-                                    <FieldError errors={campoLimite.state.meta.errors} />
-                                  </FieldContent>
-                                </Field>
-                              )}
-                            </form.Field>
-                          </FieldGroup>
-                        )}
+                        {(clave) => {
+                          const separador = clave.indexOf("|");
+                          const tipo = Number(clave.slice(0, separador));
+                          const nombreLimitacion = clave.slice(separador + 1);
+                          return (
+                            <FieldGroup>
+                              {Array.from({ length: cantidadOpciones }, (_, iOpcion) => iOpcion).map((iOpcion) => (
+                                <form.Field
+                                  key={iOpcion}
+                                  name={`restricciones[${indice}].coeficientes[${iOpcion}]`}
+                                  validators={{ onBlur: numeroAsistente }}
+                                >
+                                  {(campoAporte) => (
+                                    <Field orientation="responsive">
+                                      <FieldContent>
+                                        <FieldLabel htmlFor={`limitacion-${indice}-aporte-${iOpcion}`}>
+                                          {preguntaAporteLimitacion(etiquetasOpciones[iOpcion] ?? "", nombreLimitacion, unidad)}
+                                        </FieldLabel>
+                                        {iOpcion === 0 ? (
+                                          <FieldDescription>
+                                            {TIPOS_CON_APORTE_SI_O_NO.includes(tipo)
+                                              ? DESCRIPCION_APORTE_LIMITACION_TOTAL
+                                              : DESCRIPCION_APORTE_LIMITACION}
+                                          </FieldDescription>
+                                        ) : null}
+                                      </FieldContent>
+                                      <FieldContent className="@md/field-group:w-40 @md/field-group:flex-none">
+                                        <Input
+                                          id={`limitacion-${indice}-aporte-${iOpcion}`}
+                                          inputMode="decimal"
+                                          value={campoAporte.state.value}
+                                          onChange={(e) => campoAporte.handleChange(e.target.value)}
+                                          onBlur={campoAporte.handleBlur}
+                                          aria-invalid={campoAporte.state.meta.errors.length > 0}
+                                        />
+                                        <FieldError errors={campoAporte.state.meta.errors} />
+                                      </FieldContent>
+                                    </Field>
+                                  )}
+                                </form.Field>
+                              ))}
+                            </FieldGroup>
+                          );
+                        }}
                       </form.Subscribe>
 
                       <FieldSet>
@@ -216,10 +268,60 @@ export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar
                         </form.Field>
                       </FieldSet>
 
+                      <form.Subscribe
+                        selector={(state) => {
+                          const actual = state.values.restricciones[indice]!;
+                          return `${actual.formaCumplimiento}|${resolverNombreRestriccion(actual)}`;
+                        }}
+                      >
+                        {(clave) => {
+                          const separador = clave.indexOf("|");
+                          const forma = Number(clave.slice(0, separador));
+                          const nombreLimitacion = clave.slice(separador + 1);
+                          return (
+                            <form.Field name={`restricciones[${indice}].limite`} validators={{ onBlur: numeroAsistente }}>
+                              {(campoLimite) => (
+                                <Field orientation="responsive">
+                                  <FieldLabel htmlFor={`limitacion-${indice}-limite`}>
+                                    {preguntaLimiteLimitacion(nombreLimitacion, forma)}
+                                  </FieldLabel>
+                                  <FieldContent className="@md/field-group:w-40 @md/field-group:flex-none">
+                                    <Input
+                                      id={`limitacion-${indice}-limite`}
+                                      inputMode="decimal"
+                                      value={campoLimite.state.value}
+                                      onChange={(e) => campoLimite.handleChange(e.target.value)}
+                                      onBlur={campoLimite.handleBlur}
+                                      aria-invalid={campoLimite.state.meta.errors.length > 0}
+                                    />
+                                    <FieldError errors={campoLimite.state.meta.errors} />
+                                  </FieldContent>
+                                </Field>
+                              )}
+                            </form.Field>
+                          );
+                        }}
+                      </form.Subscribe>
+
                       {limitaciones.state.value.length > 1 ? (
                         <div className="flex justify-end">
-                          <Button type="button" variant="ghost" size="sm" onClick={() => limitaciones.removeValue(indice)}>
-                            {BOTON_QUITAR_LIMITACION}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              limitaciones.removeValue(indice);
+                              // Los índices posteriores se corren una posición.
+                              setAbiertas((previas) =>
+                                previas
+                                  .map(Number)
+                                  .filter((abierta) => abierta !== indice)
+                                  .map((abierta) => String(abierta > indice ? abierta - 1 : abierta)),
+                              );
+                            }}
+                          >
+                            <TrashIcon data-icon="inline-start" aria-hidden="true" />
+                            {botonQuitarLimitacion(indice + 1)}
                           </Button>
                         </div>
                       ) : null}
@@ -234,7 +336,11 @@ export function Paso3Limitaciones({ valorInicial, etiquetasOpciones, onContinuar
                 type="button"
                 variant="outline"
                 disabled={limitaciones.state.value.length >= CANTIDAD_RESTRICCIONES_MAXIMA}
-                onClick={() => limitaciones.pushValue(crearRestriccionVacia(cantidadOpciones))}
+                onClick={() => {
+                  const nueva = limitaciones.state.value.length;
+                  limitaciones.pushValue(crearRestriccionVacia(cantidadOpciones));
+                  setAbiertas([String(nueva)]);
+                }}
               >
                 {BOTON_AGREGAR_LIMITACION}
               </Button>

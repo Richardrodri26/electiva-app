@@ -13,7 +13,7 @@
 
 import { cn } from "cn";
 
-import { TITULOS_PASOS } from "./textos";
+import { TITULOS_PASOS, TITULOS_PASOS_CORTOS } from "./textos";
 
 export interface AsistentePasosProps {
   pasoActual: 1 | 2 | 3 | 4 | 5;
@@ -37,6 +37,8 @@ export function AsistentePasos({ pasoActual, pasoMaximoAlcanzado, onIrAPaso, cla
               type="button"
               disabled={!alcanzable}
               aria-current={esActual ? "step" : undefined}
+              aria-label={titulo}
+              title={titulo}
               onClick={() => onIrAPaso(numero)}
               className={cn(
                 "flex min-h-11 items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors",
@@ -54,7 +56,8 @@ export function AsistentePasos({ pasoActual, pasoMaximoAlcanzado, onIrAPaso, cla
               >
                 {numero}
               </span>
-              {titulo}
+              <span className="lg:hidden">{titulo}</span>
+              <span className="hidden lg:inline">{TITULOS_PASOS_CORTOS[indice]}</span>
             </button>
             {!esUltimo ? (
               <span aria-hidden="true" className="text-muted-foreground">

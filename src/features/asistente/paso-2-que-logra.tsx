@@ -22,28 +22,42 @@ import { Field, FieldContent, FieldError, FieldGroup, FieldLabel, FieldLegend, F
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { validarPaso2, type BorradorPaso2 } from "./estado";
-import { BOTON_ATRAS, BOTON_CONTINUAR, PREGUNTA_META, preguntaAporteObjetivo } from "./textos";
+import { repartirProblemas, validarPaso2, type BorradorPaso2 } from "./estado";
+import {
+  AVISO_ELEGIR_META_PRIMERO,
+  BOTON_ATRAS,
+  BOTON_CONTINUAR,
+  PREGUNTA_META,
+  preguntaAporteObjetivo,
+} from "./textos";
 
 export interface Paso2QueLograProps {
   valorInicial: BorradorPaso2;
   /** Etiquetas de las opciones (paso 1), en el mismo orden que `coeficientes`. */
   etiquetasOpciones: string[];
+  /** Unidad elegida en el paso 1 (texto final), para adaptar la pregunta ("cada hora de…"). */
+  unidad: string;
   onContinuar: (borrador: BorradorPaso2) => void;
   onAtras: () => void;
 }
 
-export function Paso2QueLogra({ valorInicial, etiquetasOpciones, onContinuar, onAtras }: Paso2QueLograProps) {
+export function Paso2QueLogra({ valorInicial, etiquetasOpciones, unidad, onContinuar, onAtras }: Paso2QueLograProps) {
   const [erroresPaso, setErroresPaso] = useState<string[]>([]);
 
   const form = useForm({
     defaultValues: valorInicial,
+    validators: {
+      // Cada problema va al campo que falla; al pie solo quedan los que no son de un campo.
+      onSubmit: ({ value }) => {
+        const resultado = validarPaso2(value);
+        if (resultado.success) return undefined;
+        const nombres = new Set(["meta", ...value.coeficientes.map((_, i) => `coeficientes[${i}]`)]);
+        const { campos, generales } = repartirProblemas(resultado.error.issues, nombres);
+        setErroresPaso(generales);
+        return { fields: campos };
+      },
+    },
     onSubmit: async ({ value }) => {
-      const resultado = validarPaso2(value);
-      if (!resultado.success) {
-        setErroresPaso([...new Set(resultado.error.issues.map((issue) => issue.message))]);
-        return;
-      }
       setErroresPaso([]);
       onContinuar(value);
     },
@@ -71,28 +85,36 @@ export function Paso2QueLogra({ valorInicial, etiquetasOpciones, onContinuar, on
         </form.Field>
       </FieldSet>
 
-      <FieldGroup>
-        {etiquetasOpciones.map((etiqueta, indice) => (
-          <form.Field key={indice} name={`coeficientes[${indice}]`} validators={{ onBlur: numeroAsistente }}>
-            {(campo) => (
-              <Field orientation="responsive">
-                <FieldLabel htmlFor={`aporte-${indice}`}>{preguntaAporteObjetivo(etiqueta)}</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id={`aporte-${indice}`}
-                    inputMode="decimal"
-                    value={campo.state.value}
-                    onChange={(evento) => campo.handleChange(evento.target.value)}
-                    onBlur={campo.handleBlur}
-                    aria-invalid={campo.state.meta.errors.length > 0}
-                  />
-                  <FieldError errors={campo.state.meta.errors} />
-                </FieldContent>
-              </Field>
-            )}
-          </form.Field>
-        ))}
-      </FieldGroup>
+      <form.Subscribe selector={(state) => state.values.meta}>
+        {(meta) =>
+          meta === null ? (
+            <p className="text-sm text-muted-foreground">{AVISO_ELEGIR_META_PRIMERO}</p>
+          ) : (
+            <FieldGroup>
+              {etiquetasOpciones.map((etiqueta, indice) => (
+                <form.Field key={indice} name={`coeficientes[${indice}]`} validators={{ onBlur: numeroAsistente }}>
+                  {(campo) => (
+                    <Field orientation="responsive">
+                      <FieldLabel htmlFor={`aporte-${indice}`}>{preguntaAporteObjetivo(meta, etiqueta, unidad)}</FieldLabel>
+                      <FieldContent className="@md/field-group:w-40 @md/field-group:flex-none">
+                        <Input
+                          id={`aporte-${indice}`}
+                          inputMode="decimal"
+                          value={campo.state.value}
+                          onChange={(evento) => campo.handleChange(evento.target.value)}
+                          onBlur={campo.handleBlur}
+                          aria-invalid={campo.state.meta.errors.length > 0}
+                        />
+                        <FieldError errors={campo.state.meta.errors} />
+                      </FieldContent>
+                    </Field>
+                  )}
+                </form.Field>
+              ))}
+            </FieldGroup>
+          )
+        }
+      </form.Subscribe>
 
       {erroresPaso.length > 0 ? (
         <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">

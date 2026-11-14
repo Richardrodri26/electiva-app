@@ -7,7 +7,9 @@ import {
   crearBorradorAsistente,
   crearCoeficientesVacios,
   crearRestriccionVacia,
+  formaSugeridaParaTipo,
   limpiarParaCorregirOpciones,
+  repartirProblemas,
   validarPaso1,
   validarPaso2,
   validarPaso3,
@@ -242,6 +244,33 @@ describe("asistente — validaciones por paso", () => {
       r.limite = "5";
     });
     expect(validarPaso3(siete).success).toBe(false);
+  });
+
+  it("repartirProblemas lleva cada problema a su campo y deja al pie solo los generales", () => {
+    const borrador = crearBorradorAsistente();
+    borrador.paso1.categoria = 1;
+    borrador.paso1.nombresOpciones = ["Mesas", "mesas"];
+    const resultado = validarPaso1(borrador.paso1);
+    expect(resultado.success).toBe(false);
+    if (resultado.success) return;
+    const { campos, generales } = repartirProblemas(
+      resultado.error.issues,
+      new Set(["nombresOpciones[0]", "nombresOpciones[1]"]),
+    );
+    expect(Object.keys(campos)).toEqual(["nombresOpciones[1]"]);
+    expect(generales).toEqual([]);
+
+    const sinCampo = repartirProblemas(resultado.error.issues, new Set());
+    expect(sinCampo.campos).toEqual({});
+    expect(sinCampo.generales).toHaveLength(1);
+  });
+
+  it("formaSugeridaParaTipo sugiere la forma solo para cantidad máxima, pedido mínimo y cantidad total", () => {
+    expect(formaSugeridaParaTipo(5)).toBe(1);
+    expect(formaSugeridaParaTipo(6)).toBe(2);
+    expect(formaSugeridaParaTipo(7)).toBe(3);
+    expect(formaSugeridaParaTipo(1)).toBeNull();
+    expect(formaSugeridaParaTipo(8)).toBeNull();
   });
 
   it("paso 4: 1 -> entera, 2 -> fraccionaria", () => {

@@ -27,27 +27,26 @@ test.describe("Asistente completo", () => {
     // Paso 2 · Qué desea conseguir.
     await expect(page).toHaveURL(/paso=2/);
     await page.getByRole("radio", { name: "Mayor utilidad" }).click();
-    await page.getByLabel("¿Cuánto aporta o cuesta cada Mesas?").fill("4");
-    await page.getByLabel("¿Cuánto aporta o cuesta cada Sillas?").fill("3");
+    await page.getByLabel("¿Cuánta ganancia deja cada unidad de «Mesas»?").fill("4");
+    await page.getByLabel("¿Cuánta ganancia deja cada unidad de «Sillas»?").fill("3");
     await page.getByRole("button", { name: "Continuar" }).click();
 
     // Paso 3 · Limitaciones. La primera es "Presupuesto" (tipo por defecto).
     await expect(page).toHaveURL(/paso=3/);
-    await page.getByLabel('¿Cuánto utiliza o aporta cada Mesas en "Presupuesto"?').fill("2");
-    await page.getByLabel('¿Cuánto utiliza o aporta cada Sillas en "Presupuesto"?').fill("1");
+    await page.getByLabel('¿Cuánto de «Presupuesto» usa cada unidad de «Mesas»?').fill("2");
+    await page.getByLabel('¿Cuánto de «Presupuesto» usa cada unidad de «Sillas»?').fill("1");
     await page
-      .getByLabel('¿Cuál es la cantidad disponible, requerida o exacta para "Presupuesto"?')
+      .getByLabel("¿Cuánto hay disponible como máximo de «Presupuesto»?")
       .fill("12");
 
-    // Segunda limitación: se agrega colapsada; se abre y se cambia el tipo a "Horas".
+    // Segunda limitación: al agregarla queda abierta; se cambia el tipo a "Horas".
     await page.getByRole("button", { name: "Agregar limitación" }).click();
-    await page.getByRole("button", { name: /^Limitación 2/ }).click();
     const limitacion2 = page.getByRole("region", { name: /^Limitación 2/ });
     await limitacion2.getByRole("combobox", { name: "¿Qué tipo de limitación desea agregar?" }).click();
     await page.getByRole("option", { name: "Horas" }).click();
-    await limitacion2.getByLabel('¿Cuánto utiliza o aporta cada Mesas en "Horas"?').fill("1");
-    await limitacion2.getByLabel('¿Cuánto utiliza o aporta cada Sillas en "Horas"?').fill("1");
-    await limitacion2.getByLabel('¿Cuál es la cantidad disponible, requerida o exacta para "Horas"?').fill("7");
+    await limitacion2.getByLabel('¿Cuánto de «Horas» usa cada unidad de «Mesas»?').fill("1");
+    await limitacion2.getByLabel('¿Cuánto de «Horas» usa cada unidad de «Sillas»?').fill("1");
+    await limitacion2.getByLabel("¿Cuánto hay disponible como máximo de «Horas»?").fill("7");
     await page.getByRole("button", { name: "Continuar" }).click();
 
     // Paso 4 · Naturaleza de las cantidades.
@@ -90,15 +89,15 @@ test.describe("Asistente completo", () => {
 
     await expect(page).toHaveURL(/paso=2/);
     await page.getByRole("radio", { name: "Mayor utilidad" }).click();
-    await page.getByLabel("¿Cuánto aporta o cuesta cada Mesas?").fill("4");
-    await page.getByLabel("¿Cuánto aporta o cuesta cada Sillas?").fill("3");
+    await page.getByLabel("¿Cuánta ganancia deja cada unidad de «Mesas»?").fill("4");
+    await page.getByLabel("¿Cuánta ganancia deja cada unidad de «Sillas»?").fill("3");
     await page.getByRole("button", { name: "Continuar" }).click();
 
     await expect(page).toHaveURL(/paso=3/);
-    await page.getByLabel('¿Cuánto utiliza o aporta cada Mesas en "Presupuesto"?').fill("2");
-    await page.getByLabel('¿Cuánto utiliza o aporta cada Sillas en "Presupuesto"?').fill("1");
+    await page.getByLabel('¿Cuánto de «Presupuesto» usa cada unidad de «Mesas»?').fill("2");
+    await page.getByLabel('¿Cuánto de «Presupuesto» usa cada unidad de «Sillas»?').fill("1");
     await page
-      .getByLabel('¿Cuál es la cantidad disponible, requerida o exacta para "Presupuesto"?')
+      .getByLabel("¿Cuánto hay disponible como máximo de «Presupuesto»?")
       .fill("12");
     await page.getByRole("button", { name: "Continuar" }).click();
 

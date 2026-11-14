@@ -248,6 +248,69 @@ export function validarPaso4(borrador: BorradorPaso4) {
   });
 }
 
+/**
+ * Forma de cumplimiento que se sugiere al elegir un tipo de limitación (ids de
+ * `TIPOS_RESTRICCION`): "Cantidad máxima" (5) → "No se puede superar" (1); "Pedido
+ * mínimo" (6) → "Se debe alcanzar como mínimo" (2); "Cantidad total" (7) → "Se debe
+ * cumplir exactamente" (3). Para el resto no hay sugerencia (`null`): se deja la forma
+ * que ya estaba elegida. El usuario puede cambiarla después.
+ */
+export function formaSugeridaParaTipo(tipo: number): number | null {
+  if (tipo === 5) return 1;
+  if (tipo === 6) return 2;
+  if (tipo === 7) return 3;
+  return null;
+}
+
+/** Un problema de validación (subconjunto de `z.core.$ZodIssue` que necesitamos). */
+export interface ProblemaValidacion {
+  message: string;
+  path: readonly PropertyKey[];
+}
+
+export interface ErroresPorCampo {
+  /** Mensaje por nombre de campo de TanStack Form (p. ej. `restricciones[0].limite`). */
+  campos: Record<string, { message: string }>;
+  /** Mensajes que no pertenecen a ningún campo concreto (se muestran al pie del paso). */
+  generales: string[];
+}
+
+/**
+ * Reparte los problemas de un `safeParse` entre los campos del formulario: cada `path`
+ * de Zod se convierte en el nombre del campo (`["restricciones", 0, "limite"]` →
+ * `restricciones[0].limite`). `redirigir` permite reubicar un path que no es un campo
+ * (devuelve el nombre del campo, o `null` para dejarlo como error general). Si dos
+ * problemas caen en el mismo campo, gana el primero; los mensajes generales se
+ * deduplican.
+ */
+export function repartirProblemas(
+  problemas: readonly ProblemaValidacion[],
+  camposExistentes: ReadonlySet<string>,
+  redirigir?: (ruta: readonly PropertyKey[]) => string | null | undefined,
+): ErroresPorCampo {
+  const campos: Record<string, { message: string }> = {};
+  const generales: string[] = [];
+  for (const problema of problemas) {
+    const redirigido = redirigir?.(problema.path);
+    const nombre = redirigido === undefined ? nombreDeCampo(problema.path) : redirigido;
+    if (nombre !== null && camposExistentes.has(nombre)) {
+      if (campos[nombre] === undefined) campos[nombre] = { message: problema.message };
+    } else if (!generales.includes(problema.message)) {
+      generales.push(problema.message);
+    }
+  }
+  return { campos, generales };
+}
+
+function nombreDeCampo(ruta: readonly PropertyKey[]): string {
+  let nombre = "";
+  for (const parte of ruta) {
+    if (typeof parte === "number") nombre += `[${parte}]`;
+    else nombre += nombre === "" ? String(parte) : `.${String(parte)}`;
+  }
+  return nombre;
+}
+
 // ---------------------------------------------------------------------------
 // 5. Ensamblado del ModeloLineal final — `console-program/src/modelBuilder.ts`
 // ---------------------------------------------------------------------------

@@ -30,12 +30,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   CANTIDAD_OPCIONES_MAXIMA,
   CANTIDAD_OPCIONES_MINIMA,
+  repartirProblemas,
   validarPaso1,
   type BorradorPaso1,
 } from "./estado";
 import {
   BOTON_CONTINUAR,
-  ETIQUETA_CANTIDAD_OPCIONES,
+  DESCRIPCION_CANTIDAD_OPCIONES,
+  DESCRIPCION_UNIDAD,
+  EJEMPLOS_NOMBRE_OPCION,
   ETIQUETA_UNIDAD_OTRA,
   PREGUNTA_CANTIDAD_OPCIONES,
   PREGUNTA_CATEGORIA,
@@ -58,12 +61,24 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
 
   const form = useForm({
     defaultValues: valorInicial,
+    validators: {
+      // Cada problema va al campo que falla; al pie solo quedan los que no son de un campo.
+      onSubmit: ({ value }) => {
+        const resultado = validarPaso1(value);
+        if (resultado.success) return undefined;
+        const nombres = new Set([
+          "categoria",
+          "unidadOtra",
+          ...value.nombresOpciones.map((_, i) => `nombresOpciones[${i}]`),
+        ]);
+        const { campos, generales } = repartirProblemas(resultado.error.issues, nombres, (ruta) =>
+          ruta[0] === "unidad" ? "unidadOtra" : undefined,
+        );
+        setErroresPaso(generales);
+        return { fields: campos };
+      },
+    },
     onSubmit: async ({ value }) => {
-      const resultado = validarPaso1(value);
-      if (!resultado.success) {
-        setErroresPaso([...new Set(resultado.error.issues.map((issue) => issue.message))]);
-        return;
-      }
       setErroresPaso([]);
       onContinuar(value);
     },
@@ -112,9 +127,9 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
         {(opciones) => (
           <FieldGroup>
             <Field orientation="responsive">
-              <FieldLabel htmlFor="cantidad-opciones">{ETIQUETA_CANTIDAD_OPCIONES}</FieldLabel>
               <FieldContent>
-                <FieldDescription>{PREGUNTA_CANTIDAD_OPCIONES}</FieldDescription>
+                <FieldLabel htmlFor="cantidad-opciones">{PREGUNTA_CANTIDAD_OPCIONES}</FieldLabel>
+                <FieldDescription>{DESCRIPCION_CANTIDAD_OPCIONES}</FieldDescription>
               </FieldContent>
               <Select
                 value={opciones.state.value.length}
@@ -128,7 +143,7 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
                   }
                 }}
               >
-                <SelectTrigger id="cantidad-opciones" aria-label={ETIQUETA_CANTIDAD_OPCIONES}>
+                <SelectTrigger id="cantidad-opciones" aria-label={PREGUNTA_CANTIDAD_OPCIONES} className="w-full @md/field-group:w-56">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -146,14 +161,19 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
                 {(campo) => (
                   <Field>
                     <FieldLabel htmlFor={`nombre-opcion-${indice}`}>{preguntaNombreOpcion(indice + 1)}</FieldLabel>
-                    <Input
-                      id={`nombre-opcion-${indice}`}
-                      value={campo.state.value}
-                      onChange={(evento) => campo.handleChange(evento.target.value)}
-                      onBlur={campo.handleBlur}
-                      aria-invalid={campo.state.meta.errors.length > 0}
-                      aria-describedby={`nombre-opcion-${indice}-error`}
-                    />
+                    <form.Subscribe selector={(state) => state.values.categoria}>
+                      {(categoria) => (
+                        <Input
+                          id={`nombre-opcion-${indice}`}
+                          placeholder={categoria === null ? undefined : EJEMPLOS_NOMBRE_OPCION[categoria]}
+                          value={campo.state.value}
+                          onChange={(evento) => campo.handleChange(evento.target.value)}
+                          onBlur={campo.handleBlur}
+                          aria-invalid={campo.state.meta.errors.length > 0}
+                          aria-describedby={`nombre-opcion-${indice}-error`}
+                        />
+                      )}
+                    </form.Subscribe>
                     <FieldError id={`nombre-opcion-${indice}-error`} errors={campo.state.meta.errors} />
                   </Field>
                 )}
@@ -165,11 +185,14 @@ export function Paso1QueDecide({ valorInicial, onContinuar }: Paso1QueDecideProp
 
       <FieldGroup>
         <Field orientation="responsive">
-          <FieldLabel htmlFor="unidad">{PREGUNTA_UNIDAD}</FieldLabel>
+          <FieldContent>
+            <FieldLabel htmlFor="unidad">{PREGUNTA_UNIDAD}</FieldLabel>
+            <FieldDescription>{DESCRIPCION_UNIDAD}</FieldDescription>
+          </FieldContent>
           <form.Field name="unidadId">
             {(field) => (
               <Select value={field.state.value} onValueChange={(valor) => valor !== null && field.handleChange(valor)}>
-                <SelectTrigger id="unidad" aria-label={PREGUNTA_UNIDAD}>
+                <SelectTrigger id="unidad" aria-label={PREGUNTA_UNIDAD} className="w-full @md/field-group:w-56">
                   <SelectValue>
                     {(valor: number) => UNIDADES.find((opcion) => opcion.valor === valor)?.etiqueta ?? ""}
                   </SelectValue>

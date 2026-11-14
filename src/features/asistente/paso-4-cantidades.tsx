@@ -14,11 +14,11 @@ import { useForm } from "@tanstack/react-form";
 import { OPCIONES_NATURALEZA } from "@/dominio/modelo/catalogos";
 
 import { Button } from "@/components/ui/button";
-import { Field, FieldContent, FieldError, FieldLegend, FieldSet, FieldTitle, FieldLabel } from "@/components/ui/field";
+import { Field, FieldContent, FieldDescription, FieldError, FieldLegend, FieldSet, FieldTitle, FieldLabel } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { validarPaso4, type BorradorPaso4 } from "./estado";
-import { BOTON_ATRAS, BOTON_CONTINUAR, PREGUNTA_NATURALEZA } from "./textos";
+import { repartirProblemas, validarPaso4, type BorradorPaso4 } from "./estado";
+import { BOTON_ATRAS, BOTON_CONTINUAR, DESCRIPCION_NATURALEZA, PREGUNTA_NATURALEZA } from "./textos";
 
 export interface Paso4CantidadesProps {
   valorInicial: BorradorPaso4;
@@ -31,12 +31,19 @@ export function Paso4Cantidades({ valorInicial, onContinuar, onAtras }: Paso4Can
 
   const form = useForm({
     defaultValues: valorInicial,
+    validators: {
+      onSubmit: ({ value }) => {
+        const resultado = validarPaso4(value);
+        if (resultado.success) return undefined;
+        const { campos, generales } = repartirProblemas(
+          resultado.error.issues,
+          new Set(["naturaleza"]),
+        );
+        setErroresPaso(generales);
+        return { fields: campos };
+      },
+    },
     onSubmit: async ({ value }) => {
-      const resultado = validarPaso4(value);
-      if (!resultado.success) {
-        setErroresPaso([...new Set(resultado.error.issues.map((issue) => issue.message))]);
-        return;
-      }
       setErroresPaso([]);
       onContinuar(value);
     },
@@ -54,6 +61,7 @@ export function Paso4Cantidades({ valorInicial, onContinuar, onAtras }: Paso4Can
     >
       <FieldSet>
         <FieldLegend>{PREGUNTA_NATURALEZA}</FieldLegend>
+        <FieldDescription>{DESCRIPCION_NATURALEZA}</FieldDescription>
         <form.Field name="naturaleza">
           {(field) => (
             <>

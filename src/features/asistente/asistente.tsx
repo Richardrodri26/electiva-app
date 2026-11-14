@@ -49,6 +49,7 @@ import {
   crearBorradorPaso3,
   crearCoeficientesVacios,
   limpiarParaCorregirOpciones,
+  resolverUnidad,
   type BorradorAsistente,
   type BorradorPaso1,
   type BorradorPaso2,
@@ -285,6 +286,7 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
         <Paso2QueLogra
           valorInicial={borrador.paso2}
           etiquetasOpciones={etiquetasOpciones}
+          unidad={resolverUnidad(borrador.paso1)}
           onContinuar={manejarPaso2}
           onAtras={() => irAPaso(1)}
         />
@@ -296,6 +298,7 @@ export function Asistente({ onModeloCompleto, className }: AsistenteProps) {
             borrador.paso3.restricciones.length > 0 ? borrador.paso3 : crearBorradorPaso3(etiquetasOpciones.length)
           }
           etiquetasOpciones={etiquetasOpciones}
+          unidad={resolverUnidad(borrador.paso1)}
           onContinuar={manejarPaso3}
           onAtras={() => irAPaso(2)}
         />
