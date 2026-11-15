@@ -4,7 +4,7 @@
 > sigue siendo `AGENTS.md` + `docs/01..08`. Este documento existe para que un agente nuevo, sin memoria de
 > las sesiones anteriores, pueda retomar el trabajo sin tener que re-descubrir todo desde cero.
 >
-> Estado al cerrar esta sesión: 414 tests unitarios pasando (8 skipped, esperados) y 16 E2E de Playwright
+> Estado al cerrar esta sesión: 425 tests unitarios pasando (8 skipped, esperados) y 26 E2E de Playwright
 > pasando (`pnpm test:e2e`). `pnpm lint` y `pnpm typecheck` sin errores. **Nunca se corrió `pnpm build`**
 > (regla global del usuario: "Never build after changes" — no la rompas).
 
@@ -45,17 +45,24 @@
 | T8.2 | E2E Playwright en `tests/e2e/` (los 5 escenarios de docs/07) | ✅ |
 | T8.3 | README en español | ✅ |
 | T8.1 | Accesibilidad y responsive: Lighthouse 100/100 en las pantallas auditadas, táctiles ≥44px, enlaces reales en vez de `role=button` | ✅ |
+| Pulido UX 2026-11-14 | Textos del asistente adaptados a meta/unidad/forma (`2e0bd48`); gráfica más grande con dominio compartido y tablas Simplex `table-fixed` (`1fe88c7`); editor con grilla alineada (`e6aa9bb`); anchos máximos unificados (`07c6370`); fix "ejercicio nuevo conserva datos" (`aa735b7`); banner de borrador también en el editor (`44033ec`); mensajes de error en español en vez de los de Zod (`6e08a2d`, `1700a96`); avisos de consola (`ea44c50`) | ✅ |
 
 ## Qué falta
 
-Nada pendiente.
+No hay tareas pendientes del plan de docs/07. Pendientes reales de pulido, todos menores:
 
-### Estado
-No quedan tareas pendientes del plan de docs/07 ni decisiones abiertas. "Cancelar" en el asistente borra el borrador y navega a `/`.
+- **L5**: el tipo de limitación (Horas, Dinero, etc.) no se elige por defecto sin que el usuario lo toque. Se dejó afuera a propósito: hay borradores guardados en localStorage y cambiarlo necesitaría una migración.
+- **L16**: la recta de nivel de la gráfica no sigue el interruptor Fracción/Decimal (siempre usa coma decimal).
+- A 1440 px la gráfica queda en ~520 px y la columna "Restricciones activas" de la tabla de vértices se corta.
+- Sin revisión visual: tema oscuro del asistente y paso 3 del asistente en móvil (375 px).
+- Con el banner de borrador del editor pendiente, lo que se escriba en el formulario en blanco no se guarda, y "Retomar el modelo" lo reemplaza.
+- `esquemaModelo` conserva los mensajes por defecto de Zod en `version`/`origen`/`objetivo`. El usuario nunca los ve (no hay forma de provocarlos desde la UI).
+
+"Cancelar" en el asistente borra el borrador y navega a `/`.
 
 ## Decisiones de arquitectura ya confirmadas con el usuario (no las vuelvas a preguntar)
 
-1. Tono de TODA la app: **"usted"** (nunca "tú" ni voseo). Los textos del asistente son literales del CLI (`../console-program/src/io/prompt.ts` y `flow/*.ts`). Se unificó en toda la UI, incluido el texto de docs/05 ("Use el Simplex.").
+1. Tono de TODA la app: **"usted"** (nunca "tú" ni voseo). Los textos del asistente nacieron literales del CLI (`../console-program/src/io/prompt.ts` y `flow/*.ts`), pero **ya no lo son**: ver decisión 21. Se unificó en toda la UI, incluido el texto de docs/05 ("Use el Simplex.").
 2. Resumen del paso 5 del asistente: formato **literal del CLI** (excepción autorizada a la regla de "sin jerga").
 3. Git: remoto `origin` en GitHub (`Richardrodri26/electiva-app`), rama `main`. Cada tarea es un commit; el push solo se hace cuando el usuario lo pide.
 4. React Compiler: **activado**.
@@ -75,6 +82,10 @@ No quedan tareas pendientes del plan de docs/07 ni decisiones abiertas. "Cancela
 18. Nombre de restricción vacío en el editor: se completa con el default ("Restricción n") antes de validar.
 19. Solución alternativa del Simplex: es una tabla extra al final del stepper (navegable con `?iter=`), no un panel separado. El motor ya expone `resultado.alternativa.{decision,tabla}` con el pivoteo completo.
 20. (Corolario de 11) Zod bloquea en UI, el dominio no — confirmado también para el motor gráfico.
+21. **El asistente se aparta a propósito de los textos literales del CLI** (matiza el punto 1): las preguntas se adaptan a la meta, la unidad y la forma de la limitación ("¿Cuánta ganancia deja cada unidad de «X»?", "cada unidad de «X»" sin concordancia, forma de cumplimiento antes del límite, forma preseleccionada según el tipo). Es para facilitar al usuario no técnico; `docs/06` §3.2 ya está actualizado. El vocabulario sigue sin jerga.
+22. Banner "Tiene un modelo sin terminar" (Retomar el modelo / Descartar) en el asistente **y** en el editor, con un componente compartido (`src/components/comunes/banner-borrador-sin-terminar.tsx`).
+23. Al resolver un modelo se descarta el borrador.
+24. Si la URL trae `?m=`, gana sobre el borrador (se carga ese modelo y no hay banner).
 
 ## Hallazgos de la revisión del motor Simplex (ya corregidos, no re-abrir)
 
@@ -112,6 +123,11 @@ completo de la solución alternativa). `docs/04` y `docs/08` ya se actualizaron 
   con envolventes, rectas con `arrow`/`line`, foco enlazado con `onFocusChange`). Tiene un bug real: con un
   dominio de eje Y fijo cuyo máximo es menor al del eje X, el rango en píxeles colapsa — usar dominio
   **compartido** entre ambos ejes (que además es lo que pide la spec para mantener aspecto ≈1:1).
+- **`cacheComponents: true`** (`next.config.ts`): Next no desmonta la pantalla anterior al navegar, así que el estado de formularios sobrevivía y "ejercicio nuevo" mostraba los datos del anterior. Solución: `src/lib/use-clave-de-reaparicion.ts` (devuelve una `key` que cambia cuando la pantalla reaparece), más borrar el borrador al resolver y cancelar el debounce del editor. Si agregás otra pantalla con estado local de formulario, usá el mismo hook.
+- **`@tanstack/charts`: `key` en las marcas.** La inferencia de clave falla con rectas horizontales y React avisa en consola; `grafica.tsx` pasa una `key` por posición. No la saques.
+- **`next/font`**: Atkinson Hyperlegible Next lleva `fallback` explícita en `src/app/layout.tsx` para evitar el aviso de consola.
+- **Dominio de la gráfica**: se redondea UNA vez (`redondearMaximoLindo` en `geometria.ts`) y se comparte entre ejes con `nice: false`; no dejes que la librería lo redondee de nuevo.
+- **`pnpm test:e2e` puede fallar una vez** por arranque en frío del dev server tras borrar `.next`. Reintentá antes de investigar.
 - Hay **dos commits de limpieza** (`ecc5036`, `0a98489`) porque un commit manual del usuario (`783a087`, "first
   commit") metió ~629 mil líneas de `.playwright-mcp/` al historial. Quedó en el historial (no se reescribió,
   decisión del usuario), pero ya no va a volver a pasar.

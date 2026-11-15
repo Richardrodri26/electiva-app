@@ -79,7 +79,7 @@ Repetir con los otros tres ejercicios y comparar:
 
 ### R5 · Asistente completo (lenguaje cotidiano)
 
-Modelo "Compromiso" expresado como Mesas y Sillas. Textos literales del asistente:
+Modelo "Compromiso" expresado como Mesas y Sillas. Textos del asistente:
 
 1. `/modelo/asistente`. **Paso 1**: elegir "Productos", llamar a la opción 1 "Mesas" y a la 2 "Sillas" → **Continuar**.
 2. **Paso 2**: meta "Mayor utilidad"; responder "¿Cuánta ganancia deja cada unidad de «Mesas»?" con `4` y la de «Sillas» con `3` → **Continuar**.
