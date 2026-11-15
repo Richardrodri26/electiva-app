@@ -44,6 +44,10 @@ import {
 } from "./geometria";
 import { construirResumenAccesible } from "./resumen";
 
+// Clave estable por posición: las filas de estas marcas no tienen un campo único (dos puntos de
+// una recta pueden compartir `y`), y sin `key` la librería avisa en consola de desarrollo.
+const clavePorPosicion = (_fila: unknown, { index }: { index: number }): number => index;
+
 export interface GraficaProps {
   resultado: ResultadoGrafico;
   modelo: ModeloLineal;
@@ -127,6 +131,7 @@ export function Grafica({
         decorative(
           areaY(envolvente, {
             id: "region-factible",
+            key: clavePorPosicion,
             x: "x1",
             y1: "inferior",
             y2: "superior",
@@ -146,6 +151,7 @@ export function Grafica({
         decorative(
           lineY([a, b], {
             id: "region-segmento",
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             stroke: "var(--primary)",
@@ -179,6 +185,7 @@ export function Grafica({
         decorative(
           lineY([segmento.desde, segmento.hasta], {
             id: `recta-${recta.restriccion}`,
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             stroke: colorRecta(recta.restriccion),
@@ -209,6 +216,7 @@ export function Grafica({
         decorative(
           lineY([segmentoNivel.desde, segmentoNivel.hasta], {
             id: "recta-nivel",
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             stroke: "var(--foreground)",
@@ -283,6 +291,7 @@ export function Grafica({
           decorative(
             dot(factibles, {
               id: "recorrido-factibles",
+              key: clavePorPosicion,
               x: "x1",
               y: "x2",
               r: 4,
@@ -296,6 +305,7 @@ export function Grafica({
           decorative(
             dot(noFactibles, {
               id: "recorrido-no-factibles",
+              key: clavePorPosicion,
               x: "x1",
               y: "x2",
               r: 4,
@@ -330,6 +340,7 @@ export function Grafica({
         decorative(
           dot(filasEnteros, {
             id: "puntos-enteros",
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             r: 2.5,
@@ -344,6 +355,7 @@ export function Grafica({
         decorative(
           dot([mejor], {
             id: "mejor-entero",
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             r: 8,
@@ -362,6 +374,7 @@ export function Grafica({
         decorative(
           dot([filaResaltada], {
             id: "vertice-resaltado",
+            key: clavePorPosicion,
             x: "x1",
             y: "x2",
             r: filaResaltada.esOptimo ? 12 : 10,

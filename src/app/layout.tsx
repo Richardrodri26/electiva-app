@@ -12,6 +12,11 @@ const fuenteInterfaz = Atkinson_Hyperlegible_Next({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "600", "700"],
+  // next/font no tiene las métricas de esta fuente (es nueva) y avisa en cada arranque de dev.
+  // Desactivar el ajuste automático solo omite la fuente de respaldo con métricas calculadas;
+  // la fuente accesible se sigue cargando igual (con display: swap).
+  adjustFontFallback: false,
+  fallback: ["system-ui", "Arial", "sans-serif"],
 });
 
 // Tipografía matemática: variables en itálica, números en regular.
